@@ -70,3 +70,22 @@ A Linked List is a linear data structure consisting of a sequence of elements, c
 - Search: O(log(n))
 - Insert: O(log(n))
 - Remove: O(log(n))
+
+### Trie
+
+- A trie, also known as a prefix tree or radix tree, is a type of search tree used to store a dynamic set or associative array where the keys are typically strings. Unlike other data structures, nodes in a trie do not store the keys themselves. Instead, a node’s position within the trie determines the key it is associated with.
+
+Example: consider storing the words “cat”, “car”, and “dog” in a trie:
+(root)
+/ | \
+ c d o
+/ \ \ \
+ a a o g
+/ \ \
+ t r g
+
+#### Applications
+
+- **Autocomplete**: Tries are used in search engines and text editors to provide word suggestions based on prefixes.
+- **Spell Checking**: Tries can quickly verify if a word exists in a dictionary.
+- **IP Routing**: Tries are used in networking to store routing information.
