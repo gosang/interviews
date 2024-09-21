@@ -56,6 +56,17 @@ A Linked List is a linear data structure consisting of a sequence of elements, c
 ### Binary Tree
 
 - A Binary Tree is a tree data structure in which each node has at most two children, which are referred to as the left child and right child
-- _Full Tree_: a tree in which every node has either 0 or 2 children
-- _Perfect Binary Tree_: a binary tree in which all interior nodes have two children and all leave have the same depth
-- _Complete Tree_: a binary tree in which every level except possibly the last is full and all nodes in the last level are as far left as possible
+- **Full Tree**: a tree in which every node has either 0 or 2 children
+- **Perfect Binary Tree**: a binary tree in which all interior nodes have two children and all leave have the same depth
+- **Complete Tree**: a binary tree in which every level except possibly the last is full and all nodes in the last level are as far left as possible
+
+### Binary Search Tree
+
+- A binary search tree, sometimes called BST, is a type of binary tree which maintains the property that the value in each node must be greater than or equal to any value stored in the left sub-tree, and less than or equal to any value stored in the right sub-tree
+
+#### Time Complexity:
+
+- Access: O(log(n))
+- Search: O(log(n))
+- Insert: O(log(n))
+- Remove: O(log(n))
