@@ -89,3 +89,13 @@ Example: consider storing the words “cat”, “car”, and “dog” in a tri
 - **Autocomplete**: Tries are used in search engines and text editors to provide word suggestions based on prefixes.
 - **Spell Checking**: Tries can quickly verify if a word exists in a dictionary.
 - **IP Routing**: Tries are used in networking to store routing information.
+
+### Fenwick Tree
+
+- A Fenwick tree, also known as a binary indexed tree (BIT), is a data structure that provides efficient methods for updating and querying prefix sums in an array. Although it is conceptually a tree, it is implemented using an array.
+- Applications
+  - Cumulative Frequency Tables: Fenwick trees are used to maintain cumulative frequencies in statistical data.
+  - Range Sum Queries: They are efficient for answering range sum queries in competitive programming and other applications.
+- **Time Complexity**:
+  - Range Sum: O(log(n))
+  - Update: O(log(n))
