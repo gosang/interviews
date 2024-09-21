@@ -106,3 +106,15 @@ Example: consider storing the words “cat”, “car”, and “dog” in a tri
 - **Time Complexity**:
   - Range Query: O(log(n))
   - Update: O(log(n))
+
+### Heap
+
+- A heap is a specialized tree-based data structure that satisfies the heap property. This property ensures that for any given node (A) and its child node (B), the key (value) of node (A) is ordered with respect to the key of node (B). This ordering applies consistently throughout the entire heap.
+- Applications
+  - **Priority Queues**: Heaps are commonly used to implement priority queues, where elements are processed based on their priority.
+  - **Heap Sort**: This sorting algorithm leverages the heap structure to sort elements efficiently.
+  - **Graph Algorithms**: Heaps are used in algorithms like Dijkstra’s shortest path algorithm to efficiently manage and retrieve the next node to process.
+- **Time Complexity**:
+  - Access Max / Min: O(1)
+  - Insert: O(log(n))
+  - Remove Max / Min: O(log(n))
