@@ -137,3 +137,19 @@
   - Best Case: O(nlog(n))
   - Worst Case: O(nlog(n))
   - Average Case: O(nlog(n))
+
+#### Bucket Sort
+
+- Bucket Sort is a sorting algorithm that works by distributing the elements of an array into a number of buckets. Each bucket is then sorted individually, either using a different sorting algorithm, or by recursively applying the bucket sorting algorithm
+- Time Complexity:
+  - Best Case: Ω(n + k)
+  - Worst Case: O(n^2)
+  - Average Case:Θ(n + k)
+
+#### Radix Sort
+
+- Radix Sort is a sorting algorithm that like bucket sort, distributes elements of an array into a number of buckets. However, radix sort differs from bucket sort by 're-bucketing' the array after the initial pass as opposed to sorting each bucket and merging
+- Time Complexity:
+  - Best Case: Ω(nk)
+  - Worst Case: O(nk)
+  - Average Case: Θ(nk)
