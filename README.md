@@ -116,3 +116,24 @@
   - **Directed Graph**: In a directed graph, the adjacency relation is not symmetric. Thus, if there is an edge from node ( u ) to node ( v ) (( u \rightarrow v )), it does not necessarily imply that there is an edge from node ( v ) to node ( u ) (( v \rightarrow u )).
   - Applications:
     - Social Networks, Web Graphs, Recommendation systems, Network analysis.
+
+## Algorithms
+
+### Sorting
+
+#### Quicksort
+
+- Stable: No
+- Time Complexity:
+  - Best Case: O(nlog(n))
+  - Worst Case: O(n^2)
+  - Average Case: O(nlog(n))
+
+#### Mergesort
+
+- Mergesort is also a divide and conquer algorithm. It continuously divides an array into two halves, recurses on both the left subarray and right subarray and then merges the two sorted halves.
+- Stable: Yes
+- Time Complexity:
+  - Best Case: O(nlog(n))
+  - Worst Case: O(nlog(n))
+  - Average Case: O(nlog(n))
