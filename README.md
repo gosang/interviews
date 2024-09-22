@@ -4,50 +4,42 @@
 
 ### Linked List
 
-A Linked List is a linear data structure consisting of a sequence of elements, called nodes. Each node contains data and a reference (or pointer) to the next node in the sequence. This structure allows for efficient insertion and removal of elements.
-
-#### Types of Linked Lists
-
-- Singly Linked List:
-  - Each node points to the next node in the sequence.
-  - The last node points to null, indicating the end of the list.
-- Doubly Linked List:
-  - Each node contains two pointers: one pointing to the previous node and one to the next node.
-  - The first node’s previous pointer and the last node’s next pointer both point to null.
-- Circular Linked List:
-  - Each node points to the next node in the sequence.
-  - The last node points back to the first node, forming a circular structure.
-
-#### Time Complexity
-
-- Access: (O(n))
-- Search: (O(n))
-- Insert: (O(1))
-- Remove: (O(1))
+- A Linked List is a linear data structure consisting of a sequence of elements, called nodes. Each node contains data and a reference (or pointer) to the next node in the sequence. This structure allows for efficient insertion and removal of elements.
+- Types of Linked Lists
+  - Singly Linked List:
+    - Each node points to the next node in the sequence.
+    - The last node points to null, indicating the end of the list.
+  - Doubly Linked List:
+    - Each node contains two pointers: one pointing to the previous node and one to the next node.
+    - The first node’s previous pointer and the last node’s next pointer both point to null.
+  - Circular Linked List:
+    - Each node points to the next node in the sequence.
+    - The last node points back to the first node, forming a circular structure.
+- Time Complexity
+  - Access: (O(n))
+  - Search: (O(n))
+  - Insert: (O(1))
+  - Remove: (O(1))
 
 ### Stack
 
 - A Stack is a collection of elements, with two principle operations: push, which adds to the collection, and pop, which removes the most recently added element
 - Last in, first out data structure (LIFO): the most recently added object is the first to be removed
-
-#### Time Complexity:
-
-- Access: O(n)
-- Search: O(n)
-- Insert: O(1)
-- Remove: O(1)
+- Time Complexity:
+  - Access: O(n)
+  - Search: O(n)
+  - Insert: O(1)
+  - Remove: O(1)
 
 ### Queue
 
 - A Queue is a collection of elements, supporting two principle operations: enqueue, which inserts an element into the queue, and dequeue, which removes an element from the queue
 - First in, first out data structure (FIFO): the oldest added object is the first to be removed
-
-#### Time Complexity:
-
-- Access: O(n)
-- Search: O(n)
-- Insert: O(1)
-- Remove: O(1)
+- Time Complexity:
+  - Access: O(n)
+  - Search: O(n)
+  - Insert: O(1)
+  - Remove: O(1)
 
 ### Tree
 
@@ -64,31 +56,20 @@ A Linked List is a linear data structure consisting of a sequence of elements, c
 
 - A binary search tree, sometimes called BST, is a type of binary tree which maintains the property that the value in each node must be greater than or equal to any value stored in the left sub-tree, and less than or equal to any value stored in the right sub-tree
 
-#### Time Complexity:
-
-- Access: O(log(n))
-- Search: O(log(n))
-- Insert: O(log(n))
-- Remove: O(log(n))
+- Time Complexity:
+  - Access: O(log(n))
+  - Search: O(log(n))
+  - Insert: O(log(n))
+  - Remove: O(log(n))
 
 ### Trie
 
 - A trie, also known as a prefix tree or radix tree, is a type of search tree used to store a dynamic set or associative array where the keys are typically strings. Unlike other data structures, nodes in a trie do not store the keys themselves. Instead, a node’s position within the trie determines the key it is associated with.
+- Applications
 
-Example: consider storing the words “cat”, “car”, and “dog” in a trie:
-(root)
-/ | \
- c d o
-/ \ \ \
- a a o g
-/ \ \
- t r g
-
-#### Applications
-
-- **Autocomplete**: Tries are used in search engines and text editors to provide word suggestions based on prefixes.
-- **Spell Checking**: Tries can quickly verify if a word exists in a dictionary.
-- **IP Routing**: Tries are used in networking to store routing information.
+  - **Autocomplete**: Tries are used in search engines and text editors to provide word suggestions based on prefixes.
+  - **Spell Checking**: Tries can quickly verify if a word exists in a dictionary.
+  - **IP Routing**: Tries are used in networking to store routing information.
 
 ### Fenwick Tree
 
