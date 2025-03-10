@@ -5,7 +5,7 @@
 // and check pairs across the split. This is less efficient than the optimal solution due to unnecessary recursion.
 // Time Complexity: O(n log n), Space Complexity: O(log n) for recursion stack.
 
-public class DivideConquerSolution {
+public class DivideConquerTwoSum {
     public int[] TwoSumDivideConquer(int[] nums, int target) {
         return TwoSumHelper(nums, target, 0, nums.Length - 1);
     }
@@ -34,7 +34,7 @@ public class DivideConquerSolution {
 // Explanation: Use a hash table to store complements, achieving linear time.
 // Time Complexity: O(n), Space Complexity: O(n)
 
-public class Solution {
+public class TwoSum {
     public int[] TwoSum(int[] nums, int target) {
         Dictionary<int, int> numMap = new Dictionary<int, int>();
         for (int i = 0; i < nums.Length; i++) {
