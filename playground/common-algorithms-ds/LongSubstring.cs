@@ -1,4 +1,6 @@
+// Longest Substring Without Repeating Characters
 // Problem: Find the length of the longest substring without repeating characters.
+
 // Divide-and-Conquer Solution
 // Explanation: Split the string and check substrings, merging results by considering boundaries. 
 // Less efficient due to overlap handling.
