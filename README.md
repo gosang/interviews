@@ -125,15 +125,21 @@
   - **Perfect Binary Tree**: A tree in which all interior nodes have exactly two children, and all the leaf nodes are at the same depth.
   - **Complete Tree**: A binary tree in which every level, except possibly the last one, is completely filled. Additionally, all nodes in the last level are as far to the left as possible.
 
-### Binary Search Tree
+### Binary Search Tree (BST)
 
-- A binary search tree, sometimes called BST, is a type of binary tree which maintains the property that the value in each node must be greater than or equal to any value stored in the left sub-tree, and less than or equal to any value stored in the right sub-tree
+- A binary search tree, often referred to as a BST, is a specialized binary tree data structure. It maintains the following property:
+
+  - The value of each node must be greater than or equal to the values stored in its left subtree.
+  - The value of each node must be less than or equal to the values stored in its right subtree.
 
 - Time Complexity:
   - Access: O(log(n))
   - Search: O(log(n))
   - Insert: O(log(n))
   - Remove: O(log(n))
+- Space Complexity
+  - Space Complexity: O(n), where n is the number of nodes in the tree. This is due to the storage required to maintain all the nodes in the tree.
+  - Auxiliary Space: O(h), where h is the height of the tree, representing the memory required for the recursion stack during operations like traversal.
 
 ### Trie
 
