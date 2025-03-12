@@ -192,15 +192,22 @@
 
 ### Heap
 
-- A heap is a specialized tree-based data structure that satisfies the heap property. This property ensures that for any given node (A) and its child node (B), the key (value) of node (A) is ordered with respect to the key of node (B). This ordering applies consistently throughout the entire heap.
+- A heap is a specialized tree-based data structure that satisfies the heap property. This property ensures that for any given node 𝐴 and its child node
+  𝐵, the value (or key) of node 𝐴 is ordered relative to the value of node 𝐵:
+  - In a max-heap, the value of each parent node is greater than or equal to the values of its child nodes.
+  - In a min-heap, the value of each parent node is less than or equal to the values of its child nodes.
+- Heaps are commonly implemented using arrays to efficiently represent the tree structure.
 - Applications
-  - **Priority Queues**: Heaps are commonly used to implement priority queues, where elements are processed based on their priority.
-  - **Heap Sort**: This sorting algorithm leverages the heap structure to sort elements efficiently.
-  - **Graph Algorithms**: Heaps are used in algorithms like Dijkstra’s shortest path algorithm to efficiently manage and retrieve the next node to process.
-- **Time Complexity**:
-  - Access Max / Min: O(1)
-  - Insert: O(log(n))
-  - Remove Max / Min: O(log(n))
+  - **Priority Queues**: Heaps are widely used to implement priority queues, where elements are processed in order of their priority (e.g., highest or lowest).
+  - **Heap Sort**: A comparison-based sorting algorithm that leverages the heap structure to sort elements efficiently in O(n log(n)) time.
+  - **Graph Algorithms**: Heaps are essential in algorithms like Dijkstra’s shortest path and Prim’s Minimum Spanning Tree, as they enable efficient retrieval of the next node to process.
+- Time Complexity
+  - Access Max/Min: O(1), as the maximum (or minimum) element is always at the root of the heap.
+  - Insert: O(log(n)), due to the process of restoring the heap property (heapification) after insertion.
+  - Remove Max/Min: O(log(n)), as removing the root requires re-establishing the heap property.
+- Space Complexity
+  - Space Complexity: O(n), where n is the number of elements stored in the heap.
+  - Auxiliary Space: O(1), since heaps are typically implemented in place using arrays.
 
 ### Hashing
 
