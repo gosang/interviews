@@ -103,7 +103,19 @@
 
 ### Tree
 
-- A Tree is an undirected, connected, acyclic graph
+- A Tree is a type of data structure or graph that adheres to the following properties:
+  - It is connected, meaning there is a path between any two nodes.
+  - It is acyclic, meaning it contains no closed loops or cycles.
+  - It is an undirected graph, where edges between nodes do not have a direction.
+- In the context of computer science and graph theory, a tree is widely used to represent hierarchical relationships or structures.
+- Key Features of a Tree
+  - Root Node: The topmost node in the tree, where traversal begins.
+  - Child Nodes: Nodes directly connected to a node when moving away from the root.
+  - Parent Node: A node connected to one or more child nodes.
+  - Leaf Nodes: Nodes with no children (terminal nodes).
+  - Edge: A connection between two nodes.
+  - Height of Tree: The length of the longest path from the root to any leaf node.
+  - Depth of Node: The distance (number of edges) from the root to the node.
 
 ### Binary Tree
 
