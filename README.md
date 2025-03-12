@@ -39,13 +39,34 @@
 
 ### Stack
 
-- A Stack is a collection of elements, with two principle operations: push, which adds to the collection, and pop, which removes the most recently added element
-- Last in, first out data structure (LIFO): the most recently added object is the first to be removed
+- A Stack is a linear data structure that follows the Last In, First Out (LIFO) principle. This means the element that is added most recently to the stack is the first one to be removed.
+- Key Operations:
+  - Push: Adds an element to the top of the stack.
+  - Pop: Removes the element from the top of the stack.
+  - Peek (or Top): Retrieves the element at the top of the stack without removing it (optional, but commonly supported).
+- Stacks are widely used in programming for tasks like backtracking, function call management, and expression evaluation.
+- Characteristics of a Stack
+  - LIFO Structure: The last element added is always the first to be removed.
+  - Dynamic: The size of the stack can grow or shrink as needed (depending on implementation).
+  - Typically implemented using arrays or linked lists.
 - Time Complexity:
   - Access: O(n)
   - Search: O(n)
   - Insert: O(1)
   - Remove: O(1)
+    Explanation:
+  - Access/Search: Requires traversing the stack, resulting in O(n).
+  - Insert/Remove: These operations occur at the top of the stack and take constant time, O(1).
+- Space Complexity
+- | Type | Space Complexity |
+  | Array-based Stack | O(n) |
+  | Linked list-based Stack | O(n) |
+  Explanation:
+  - Array-Based Stack:
+    - Requires memory to store the elements in a contiguous block.
+    - If the stack dynamically resizes, additional space may be temporarily required during resizing.
+  - Linked list-based Stack
+    - Each node requires extra memory for storing pointers (or references), leading to slightly higher space usage compared to an array-based stack.
 
 ### Queue
 
