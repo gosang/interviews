@@ -119,10 +119,11 @@
 
 ### Binary Tree
 
-- A Binary Tree is a tree data structure in which each node has at most two children, which are referred to as the left child and right child
-- **Full Tree**: a tree in which every node has either 0 or 2 children
-- **Perfect Binary Tree**: a binary tree in which all interior nodes have two children and all leave have the same depth
-- **Complete Tree**: a binary tree in which every level except possibly the last is full and all nodes in the last level are as far left as possible
+- A binary tree is a type of tree data structure in which each node can have at most two children, commonly referred to as the left child and right child.
+- Types of Binary Trees
+  - **Full Tree**: A tree in which every node has either 0 or 2 children, without exception.
+  - **Perfect Binary Tree**: A tree in which all interior nodes have exactly two children, and all the leaf nodes are at the same depth.
+  - **Complete Tree**: A binary tree in which every level, except possibly the last one, is completely filled. Additionally, all nodes in the last level are as far to the left as possible.
 
 ### Binary Search Tree
 
