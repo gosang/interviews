@@ -4,22 +4,38 @@
 
 ### Linked List
 
-- A Linked List is a linear data structure consisting of a sequence of elements, called nodes. Each node contains data and a reference (or pointer) to the next node in the sequence. This structure allows for efficient insertion and removal of elements.
-- Types of Linked Lists
-  - Singly Linked List:
-    - Each node points to the next node in the sequence.
-    - The last node points to null, indicating the end of the list.
-  - Doubly Linked List:
-    - Each node contains two pointers: one pointing to the previous node and one to the next node.
-    - The first node’s previous pointer and the last node’s next pointer both point to null.
-  - Circular Linked List:
-    - Each node points to the next node in the sequence.
-    - The last node points back to the first node, forming a circular structure.
+- A Linked List is a linear data structure consisting of a sequence of elements, called nodes. Each node contains:
+  - Data: The actual value stored in the node.
+  - Reference (or Pointer): A link to the next node in the sequence.
+    This structure allows for efficient insertion and removal of elements but does not support random access.
+
+#### Types of Linked Lists
+
+- Singly Linked List:
+  - Each node points to the next node in the sequence.
+  - The last node's pointer references null, indicating the end of the list.
+- Doubly Linked List:
+  - Each node contains two pointers:
+    - One pointing to the previous node.
+    - One pointing to the next node.
+  - The first node’s previous pointer and the last node’s next pointer reference null.
+- Circular Linked List:
+  - Each node points to the next node in the sequence.
+  - The last node points back to the first node, forming a continuous circular structure.
 - Time Complexity
   - Access: (O(n))
   - Search: (O(n))
   - Insert: (O(1))
   - Remove: (O(1))
+- Space Complexity
+- | Type | Space Complexity |
+  | Singly Linked List | O(n) |
+  | Doubly Linked List |O(n) |
+  | Circular Linked List | O(n) |
+  Explanation:
+  - The space complexity is O(n) for all types of linked lists, where n is the number of nodes, because each node requires memory to store:
+    - The data (value).
+    - One or two pointers, depending on the type of linked list.
 
 ### Stack
 
