@@ -72,13 +72,34 @@
 
 ### Queue
 
-- A Queue is a collection of elements, supporting two principle operations: enqueue, which inserts an element into the queue, and dequeue, which removes an element from the queue
-- First in, first out data structure (FIFO): the oldest added object is the first to be removed
+- A Queue is a linear data structure that follows the First In, First Out (FIFO) principle. This means that the element added earliest to the queue is the first one to be removed, much like a line of people waiting to be served.
+- Key Operations:
+  - Enqueue: Adds an element to the end (rear) of the queue.
+  - Dequeue: Removes an element from the front of the queue.
+  - Peek (or Front): Retrieves the element at the front of the queue without removing it (optional but commonly supported).
+- Characteristics of a Queue
+  - FIFO Structure: The first element added is always the first to be removed.
+  - Dynamic Size: The size of the queue can grow or shrink dynamically based on operations (if implemented with dynamic structures like linked lists).
+  - Used extensively in scenarios such as task scheduling, breadth-first search algorithms, and buffer management.
 - Time Complexity:
-  - Access: O(n)
-  - Search: O(n)
-  - Insert: O(1)
-  - Remove: O(1)
+  | Type | Time Complexity |
+  | -------------------- | ---------------- |
+  | Access | O(n) |
+  | Search | O(n) |
+  | Insert | O(1) |
+  | Remove | O(1) |
+  - Access/Search: Traversing the queue is required, resulting in O(n).
+  - Insert/Remove: These operations occur at the rear or front of the queue, which take constant time, O(1).
+- Space Complexity
+  | Type | Time Complexity |
+  | -------------------- | ---------------- |
+  | Array-based Queue | O(n) |
+  | Linked list-based Queue | O(n) |
+  - Array-Based Queue
+    - Requires memory for storing elements in a contiguous block.
+    - May require additional memory during resizing (if dynamic arrays are used).
+  - Linked list-based Queue
+    - Each node requires memory for data and a pointer/reference, leading to slightly higher space usage.
 
 ### Tree
 
