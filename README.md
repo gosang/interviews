@@ -33,7 +33,7 @@
   | Singly Linked List   | O(n)             |
   | Doubly Linked List   | O(n)             |
   | Circular Linked List | O(n)             |
-  Explanation:
+
   - The space complexity is O(n) for all types of linked lists, where n is the number of nodes, because each node requires memory to store:
     - The data (value).
     - One or two pointers, depending on the type of linked list.
