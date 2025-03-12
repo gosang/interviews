@@ -28,11 +28,11 @@
   - Insert: (O(1))
   - Remove: (O(1))
 - Space Complexity
-- | Type                 | Space Complexity |
+  | Type | Space Complexity |
   | -------------------- | ---------------- |
-  | Singly Linked List   | O(n)             |
-  | Doubly Linked List   | O(n)             |
-  | Circular Linked List | O(n)             |
+  | Singly Linked List | O(n) |
+  | Doubly Linked List | O(n) |
+  | Circular Linked List | O(n) |
 
   - The space complexity is O(n) for all types of linked lists, where n is the number of nodes, because each node requires memory to store:
     - The data (value).
@@ -59,10 +59,11 @@
   - Access/Search: Requires traversing the stack, resulting in O(n).
   - Insert/Remove: These operations occur at the top of the stack and take constant time, O(1).
 - Space Complexity
-- | Type | Space Complexity |
+  | Type | Space Complexity |
+  | -------------------- | ---------------- |
   | Array-based Stack | O(n) |
   | Linked list-based Stack | O(n) |
-  Explanation:
+
   - Array-Based Stack:
     - Requires memory to store the elements in a contiguous block.
     - If the stack dynamically resizes, additional space may be temporarily required during resizing.
