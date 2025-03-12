@@ -141,14 +141,22 @@
   - Space Complexity: O(n), where n is the number of nodes in the tree. This is due to the storage required to maintain all the nodes in the tree.
   - Auxiliary Space: O(h), where h is the height of the tree, representing the memory required for the recursion stack during operations like traversal.
 
-### Trie
+### Trie (Prefix Tree or Radix Tree)
 
-- A trie, also known as a prefix tree or radix tree, is a type of search tree used to store a dynamic set or associative array where the keys are typically strings. Unlike other data structures, nodes in a trie do not store the keys themselves. Instead, a node’s position within the trie determines the key it is associated with.
-- Applications
+- A trie is a tree-like data structure used to store a dynamic set or associative array where the keys are typically strings. Unlike many other data structures, the nodes in a trie do not store the keys directly. Instead, the position of a node within the trie defines the key it is associated with. Each edge between nodes represents a character, and traversing the tree spells out the keys.
+- Some applications
 
   - **Autocomplete**: Tries are used in search engines and text editors to provide word suggestions based on prefixes.
   - **Spell Checking**: Tries can quickly verify if a word exists in a dictionary.
   - **IP Routing**: Tries are used in networking to store routing information.
+
+- Time Complexity:
+  - Insertion: O(m), where m is the length of the key being inserted. This is because each character of the key needs to be processed.
+  - Search: O(m), where m is the length of the key being searched. The search operation also involves traversing the trie one character at a time.
+  - Deletion: O(m), as it requires searching for the key first, which takes O(m), and then performing cleanup operations.
+- Space Complexity:
+  - Space Complexity: O(n \* m), where n is the number of keys stored in the trie, and m is the average length of the keys. This accounts for storing all characters in the trie nodes.
+  - Auxiliary Space: Additional space may be required for recursive calls during operations like traversal, but this is generally proportional to the height of the trie.
 
 ### Fenwick Tree
 
