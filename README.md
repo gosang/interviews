@@ -158,15 +158,19 @@
   - Space Complexity: O(n \* m), where n is the number of keys stored in the trie, and m is the average length of the keys. This accounts for storing all characters in the trie nodes.
   - Auxiliary Space: Additional space may be required for recursive calls during operations like traversal, but this is generally proportional to the height of the trie.
 
-### Fenwick Tree
+### Fenwick Tree (Binary Indexed Tree - BIT)
 
-- A Fenwick tree, also known as a binary indexed tree (BIT), is a data structure that provides efficient methods for updating and querying prefix sums in an array. Although it is conceptually a tree, it is implemented using an array.
+- A Fenwick tree, also known as a binary indexed tree (BIT), is a data structure that provides efficient methods for updating and querying prefix sums in an array. While it is conceptually a tree, it is implemented using a flat array for simplicity and efficiency.
 - Applications
-  - Cumulative Frequency Tables: Fenwick trees are used to maintain cumulative frequencies in statistical data.
-  - Range Sum Queries: They are efficient for answering range sum queries in competitive programming and other applications.
+  - Cumulative Frequency Tables: Fenwick trees are used to maintain and update cumulative frequencies in statistical datasets efficiently.
+  - Range Sum Queries: They are widely used in competitive programming and other fields to answer range sum queries efficiently.
+  - Dynamic Arrays: Useful for handling dynamic prefix sums, allowing quick updates and queries without rebuilding the data structure.
 - **Time Complexity**:
-  - Range Sum: O(log(n))
-  - Update: O(log(n))
+  - Range Sum Query: O(log(n)), where n is the size of the array. This is achieved by traversing the binary representation of indices.
+  - Update Operation: O(log(n)), as updates propagate through relevant nodes in the tree.
+- **Space Complexity**:
+- Space Complexity: O(n), where n is the size of the array. This accounts for the storage of the array-based implementation of the Fenwick tree.
+- Auxiliary Space: Minimal additional space is required for operations, aside from the input array.
 
 ### Segment Tree
 
