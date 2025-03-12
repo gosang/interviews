@@ -28,10 +28,11 @@
   - Insert: (O(1))
   - Remove: (O(1))
 - Space Complexity
-- | Type | Space Complexity |
-  | Singly Linked List | O(n) |
-  | Doubly Linked List |O(n) |
-  | Circular Linked List | O(n) |
+- | Type                 | Space Complexity |
+  | -------------------- | ---------------- |
+  | Singly Linked List   | O(n)             |
+  | Doubly Linked List   | O(n)             |
+  | Circular Linked List | O(n)             |
   Explanation:
   - The space complexity is O(n) for all types of linked lists, where n is the number of nodes, because each node requires memory to store:
     - The data (value).
