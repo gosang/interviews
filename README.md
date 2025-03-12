@@ -174,10 +174,21 @@
 
 ### Segment Tree
 
-- A Segment tree, is a tree data structure for storing intervals, or segments. It allows querying which of the stored segments contain a given point
+- A Segment Tree is a versatile tree data structure used to store information about intervals or segments of data. It supports efficient querying and updating of aggregated values over a range of indices in an array. This makes it particularly useful for range-based queries and modifications.
+- Key Features:
+  - A Segment Tree divides the array into segments and builds a binary tree structure, where each node represents a specific segment of the array.
+  - It allows for efficient processing of range-based queries and updates in logarithmic time.
+  - Common operations include finding the sum, minimum, maximum, or greatest common divisor (GCD) over a given range.
+- Some applications
+  - Database Management: Used to optimize range-based queries and updates, such as calculating sums or counts across specified fields in large datasets.
+  - Financial Analysis: Applied in stock market data analysis for efficient range queries, such as calculating moving averages or aggregating data over specific time intervals.
+  - Geographical Information Systems (GIS): Used to process spatial data, such as querying elevation ranges or aggregated weather data for specific regions.
 - **Time Complexity**:
-  - Range Query: O(log(n))
-  - Update: O(log(n))
+  - Range Query: O(log(n)), where n is the number of elements in the array. This is achieved by selectively traversing only relevant branches of the tree.
+  - Update Operation: O(log(n)), as updates propagate through the tree to maintain the consistency of affected segments.
+- **Space Complexity**:
+  - Space Complexity: O(n), for storing the array representation of the tree, where n is the size of the input array.
+  - Auxiliary Space: O(log(n)), required for the recursion stack during operations.
 
 ### Heap
 
