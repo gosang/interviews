@@ -527,3 +527,42 @@ Applications include Network Design(Design efficient communication or transporta
 Circuit Design(Optimize connections in electrical circuits),
 Clustering Problems(Used in data analysis to group similar objects),
 Navigation Systems(Minimize costs in creating maps or routes).
+
+### Kruskal's Algorithm
+
+Kruskal's Algorithm is a greedy algorithm used to find the Minimum Spanning Tree (MST) of a graph. It operates by sorting all edges in the graph based on their weights and iteratively adding edges to the MST, ensuring no cycles are formed. Unlike Prim's Algorithm, Kruskal's does not require the graph to be connected, as it can construct a minimum spanning forest for disconnected graphs.
+
+- Works on weighted, undirected graphs.
+- Can handle both connected and disconnected graphs (creates a minimum spanning forest for disconnected graphs).
+- Uses the concept of union-find (disjoint set data structure) to efficiently detect and prevent cycles.
+
+Algorithm Steps
+
+- Sort Edges by Weight:
+  - Begin by sorting all edges in ascending order of their weights.
+- Initialize Forest:
+  - Treat each vertex as an independent tree (i.e., the MST starts with ∣𝑉∣ single-node trees).
+- Edge Selection:
+  - Iterate through the sorted edges. For each edge, check if adding it to the MST would form a cycle using the union-find data structure.
+  - If no cycle is formed, add the edge to the MST.
+- Repeat Until MST is Formed:
+  - Continue adding edges until the MST contains ∣𝑉∣−1 edges (for a connected graph).
+
+Time Complexity
+
+- Sorting Edges
+  - Sorting all edges takes O(|E| log |E|)
+  - Since ∣𝐸∣≤∣𝑉∣2, this can also be written as O(|E| log |V|).
+- Union-Find Operations
+  - For ∣𝐸∣ edges, performing union and find operations takes approximately O(|E| \alpha(|V|)), where 𝛼(∣𝑉∣) is the inverse Ackermann function (almost constant).
+- Overall Complexity
+  - The dominant term is the sorting step, so the total time complexity is O(|E| log |V|).
+
+Space Complexity
+
+- O(|V| + |E|): Space is required to store the graph and the union-find data structure.
+
+Applications include Network Design(Optimize cost for constructing communication, transportation, or electrical networks),
+Clustering(Used in hierarchical clustering algorithms to group similar items),
+Approximation Algorithms(Applied in problems requiring the construction of low-cost networks),
+Forest Construction(Handles disconnected graphs effectively by creating a minimum spanning forest),
