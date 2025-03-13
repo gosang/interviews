@@ -487,3 +487,43 @@ Space Complexity
 Applications include All-Pairs Shortest Path (Efficiently compute shortest path distances in road networks, communication networks, or any system modeled as a graph),
 Detecting Negative Weight Cycles(A graph has a negative weight cycle if, after completing the algorithm, 𝑑𝑖𝑠𝑡[𝑖][𝑗] < 0 for any vertex 𝑖),
 Routing in Networks(Determine optimal routes in communication or transportation networks).
+
+### Prim's Algorithm
+
+Prim's Algorithm is a greedy algorithm used to find the Minimum Spanning Tree (MST) of a weighted undirected graph. The MST is a subset of the graph’s edges that connects all vertices with the minimum possible total edge weight, ensuring there are no cycles.
+
+- Starts with a single vertex and grows the spanning tree one edge at a time by choosing the smallest available edge that connects a vertex in the tree to a vertex outside the tree.
+- Uses a priority queue or simple arrays to select the minimum weight edge efficiently.
+- Guarantees the MST for connected and undirected graphs.
+
+Algorithm Steps
+
+- Initialization:
+  - Choose an arbitrary starting vertex and initialize it as part of the MST.
+  - Assign infinite weights (or large values) to all other vertices initially, representing their distance from the MST.
+- Edge Selection:
+  - Repeatedly select the smallest weight edge that connects a vertex in the MST to a vertex outside the MST.
+  - Add the selected edge and its associated vertex to the MST.
+- Update Weights:
+  - Update the weights of all vertices outside the MST based on their distance to the newly added vertex.
+- Repeat:
+  - Continue until all vertices are included in the MST.
+
+Time Complexity
+The time complexity depends on the data structure used:
+
+- Naive Implementation (using arrays):
+  - O(|V|²), where ∣𝑉∣ is the number of vertices.
+  - This occurs because selecting the minimum weight edge at each step requires scanning all vertices.
+- Optimized Implementation (using a binary heap or priority queue):
+  - O((|V| + |E|) \log |V|), where ∣𝐸∣ is the number of edges.
+  - This optimization significantly improves performance for sparse graphs.
+
+Space Complexity
+
+- O(|V| + |E|): Space is required for storing the graph (in an adjacency list) and auxiliary data structures like the priority queue.
+
+Applications include Network Design(Design efficient communication or transportation networks (e.g., laying cables or constructing roads)),
+Circuit Design(Optimize connections in electrical circuits),
+Clustering Problems(Used in data analysis to group similar objects),
+Navigation Systems(Minimize costs in creating maps or routes).
