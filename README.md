@@ -239,8 +239,8 @@
 - Types of Graphs
   - **Undirected Graph**: In an undirected graph, the adjacency relation is symmetric. This means that if there is an edge from node 𝑢 to node 𝑣(𝑢↔𝑣), there is also an edge from node 𝑣 to node 𝑢 (𝑣 ↔ 𝑢). Essentially, the edges have no direction. Example: A social network where friendships are mutual.
   - **Directed Graph (Digraph)**: In a directed graph, the adjacency relation is asymmetric. This means that if there is an edge from node 𝑢 to node 𝑣(𝑢→𝑣), it does not necessarily imply that there is an edge from node 𝑣 to node 𝑢 (𝑣→𝑢). The edges have a specific direction. Example: A web graph where hyperlinks point from one webpage to another.
-- Time and Space Complexity of Graphs
-- The complexities of graphs depend on how the graph is represented:
+- Time and Space Complexity of Graphs:
+  The complexities of graphs depend on how the graph is represented:
 
   - Adjacency Matrix Representation
     - **Time Complexity**
@@ -264,11 +264,16 @@
 
 #### Quicksort
 
-- Stable: No
+Quicksort is a widely used divide-and-conquer sorting algorithm that is known for its efficiency in handling large datasets. It works by partitioning the array into smaller subarrays based on a pivot element and recursively sorting the subarrays.
+
+- Stable: No (The relative order of equal elements may not be preserved in the original implementation).
+- In-place: Yes (Requires only O(log(n)) additional memory for the recursion stack).
 - Time Complexity:
-  - Best Case: O(nlog(n))
-  - Worst Case: O(n^2)
-  - Average Case: O(nlog(n))
+  - Best Case: O(nlog(n)): Occurs when the pivot divides the array into two nearly equal halves at every step.
+  - Worst Case: O(n^2): Happens when the pivot is the smallest or largest element, resulting in highly unbalanced partitions (e.g., for already sorted or reverse-sorted arrays).
+  - Average Case: O(nlog(n)): On average, the pivot provides reasonably balanced partitions, leading to logarithmic recursive steps.
+- Space Complexity:
+  - O(log(n)): Quicksort is in-place and only requires additional memory for the recursion stack, making it memory-efficient compared to other divide-and-conquer algorithms like Merge Sort.
 
 #### Mergesort
 
