@@ -326,8 +326,9 @@ Depth First Search (DFS) is a fundamental graph traversal algorithm. It systemat
 
 Time Complexity
 
-- O(|V| + |E|), where: ∣𝑉∣: Number of vertices in the graph.
-- ∣𝐸∣: Number of edges in the graph. DFS processes all vertices and edges, making its runtime proportional to the size of the graph.
+- O(|V| + |E|), where:
+  - ∣𝑉∣: Number of vertices in the graph.
+  - ∣𝐸∣: Number of edges in the graph. DFS processes all vertices and edges, making its runtime proportional to the size of the graph.
 
 Space Complexity
 
@@ -347,8 +348,9 @@ Breadth First Search (BFS) is a fundamental graph traversal algorithm. It explor
 
 - Time Complexity
 
-  - O(|V| + |E|), where: ∣𝑉∣: Number of vertices in the graph.
-  - ∣𝐸∣: NNumber of edges. BFS processes each vertex and edge exactly once, resulting in a runtime proportional to the size of the graph.
+  - O(|V| + |E|), where:
+    - ∣𝑉∣: Number of vertices in the graph.
+    - ∣𝐸∣: NNumber of edges. BFS processes each vertex and edge exactly once, resulting in a runtime proportional to the size of the graph.
 
 - Space Complexity
   - O(|V|) for storing the queue and the visited set (or array), as they must hold all vertices in the worst case.
@@ -366,8 +368,9 @@ Topological Sort is a linear ordering of the nodes (or vertices) of a directed a
 - Multiple valid topological orderings may exist for a single graph.
 - Time Complexity
 
-  - O(|V| + |E|), where: ∣𝑉∣: Number of vertices in the graph.
-  - ∣𝐸∣: Number of edges in the graph. The algorithm visits each vertex and processes all its outgoing edges, resulting in linear complexity.
+  - O(|V| + |E|), where:
+    - ∣𝑉∣: Number of vertices in the graph.
+    - ∣𝐸∣: Number of edges in the graph. The algorithm visits each vertex and processes all its outgoing edges, resulting in linear complexity.
 
 - Space Complexity
 
@@ -380,3 +383,40 @@ Topological Sort is a linear ordering of the nodes (or vertices) of a directed a
 Applications of Topological Sort include Task Scheduling (determine the order in which tasks with dependencies (e.g., jobs, courses) should be executed),
 Precedence Problems (solve problems where certain tasks or actions must be performed before others),
 Project Management (represent activities in a project and ensure the order of execution respects dependencies)
+
+### Dijkstra's Algorithm
+
+Dijkstra's Algorithm is a widely used graph algorithm for finding the shortest path from a source vertex to all other vertices in a graph. It works with weighted graphs where edge weights represent distances or costs, provided all edge weights are non-negative.
+The algorithm uses a greedy approach, selecting the shortest known distance at each step to ensure efficient pathfinding.
+
+- Finds the shortest paths from a single source vertex to all other vertices.
+- Assumes all edge weights are non-negative (does not work with negative weights).
+- Guarantees the shortest path for all vertices in the graph if executed to completion
+
+- Time Complexity
+  The time complexity depends on the data structures used:
+
+  - Naive Implementation (using arrays):
+    - O(|V|²), where ∣𝑉∣ is the number of vertices.
+    - This occurs when finding the minimum distance vertex at each step requires scanning the entire list of vertices.
+  - Optimized Implementation (using a priority queue, e.g., a binary heap):
+    - O((|V| + |E|) \log |V|), where ∣𝐸∣ is the number of edges.
+    - The priority queue ensures efficient updates and retrieval of the next closest vertex.
+
+- Space Complexity
+
+  - O(|V| + |E|): Space is required to store the graph (adjacency list) and additional data structures such as the distance array and the priority queue.
+
+- Steps of the Algorithm
+- Initialization:
+  - Set the distance to the source vertex as 0 and to all other vertices as infinity.
+  - Initialize a priority queue to track vertices with the shortest known distances.
+- Relaxation:
+  - Iteratively extract the vertex with the smallest distance from the priority queue.
+  - Update the distances of its neighboring vertices if a shorter path is found.
+- Termination:
+  - The algorithm terminates when all vertices have been processed, resulting in the shortest paths from the source to all other vertices.
+
+Applications include Network Routing(Find the shortest path in communication and transportation networks),
+Mapping and Navigation(Used in GPS systems to find the shortest route between locations),
+Resource Optimization(Solve problems in logistics, such as determining the fastest delivery routes).
