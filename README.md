@@ -211,12 +211,25 @@
 
 ### Hashing
 
-- Hashing is a technique used to map data of arbitrary size to fixed-size values, known as hash values, hash codes, or simply hashes. When two keys produce the same hash value, a collision occurs.
-- Hash Maps: A Hash Map (or hash table) is a data structure that stores key-value pairs. It uses a hash function to compute an index (or hash code) into an array of buckets or slots, from which the desired value can be found. The primary advantage of hash maps is their ability to provide fast data retrieval, typically in constant time, (O(1)).
+- Hashing: Hashing is a technique used to map data of arbitrary size to fixed-size values, known as hash values, hash codes, or simply hashes. It plays a critical role in data structures and algorithms, providing efficient data organization and retrieval. A collision occurs when two keys produce the same hash value.
+- Hash Maps: A Hash Map (or hash table) is a data structure that stores key-value pairs. It uses a hash function to compute an index (or hash code) into an array of buckets or slots, where the desired value can be found. The key advantage of hash maps is their ability to provide fast data retrieval, typically in constant time (O(1)).
 - Common methods to handle collisions:
-  - Separate Chaining: a collision resolution technique used in hash maps. When two keys hash to the same index, separate chaining stores these keys in a linked list at that index. This way, each bucket in the hash table points to a linked list of entries that share the same hash code. This method is simple and effective, especially when the number of collisions is low.
-  - Open Addressing: is another collision resolution method where, instead of using linked lists, all elements are stored within the hash table itself. When a collision occurs, the algorithm searches for the next available slot in the array (using techniques like linear probing, quadratic probing, or double hashing) to store the new entry. This approach minimizes memory usage and can be faster for lookups when the table is not too full
-- Applications: Password Authentication, Data Storage and Retrieval, Caching, Cryptography
+  - Separate Chaining: This technique resolves collisions by storing multiple entries that hash to the same index in a linked list. Each bucket in the hash table points to a linked list containing all entries that share the same hash code. It is simple and effective, particularly when collisions are rare.
+  - Open Addressing: In this method, all elements are stored within the hash table itself. When a collision occurs, the algorithm searches for the next available slot in the array to store the new entry. Techniques like linear probing, quadratic probing, or double hashing are used for this purpose. Open addressing minimizes memory usage and works well when the table has low occupancy.
+- Applications: Password Authentication (Securely hashing passwords to enhance security), Data Storage and Retrieval (Enabling quick access to large datasets), Caching (Storing frequently accessed data for faster retrieval), Cryptography (Ensuring data integrity and security through hash functions)
+- **Time Complexity**
+  - **Search, Insert, and Delete (Average Case)**: O(1), thanks to uniform distribution by the hash function.
+  - **Search, Insert, and Delete (Worst Case)**: O(n), which occurs when all keys hash to the same index, resulting in a single chain or full probing.
+  - **Separate Chaining**
+    - (Average Case): O(1) for insertions, deletions, and lookups.
+    - (Worst Case): O(n), where all entries collide and form a single linked list.
+  - **Open Addressing**
+    - (Average Case): O(1) for insertions, deletions, and lookups.
+    - (Worst Case): O(n), when searching through a long probe sequence.
+- **Space Complexity**
+  - O(n), where 𝑛 is the number of key-value pairs stored in the hash map.
+  - **Separate Chaining**: O(n + m), where 𝑛 is the number of keys and 𝑚 is the size of the table.
+  - **Open Addressing**: O(m), where 𝑚 is the size of the table.
 
 ### Graph
 
