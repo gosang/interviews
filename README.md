@@ -336,3 +336,19 @@ Space Complexity
 DFS is powerful and versatile, forming the basis of many graph algorithms like Topological Sorting (Used to order tasks, such as scheduling jobs, resolving package dependencies, or ordering instructions in compilers),
 Strongly Connected Components detection (Find SCCs in directed graphs using Tarjan's or Kosaraju's algorithm, useful in analyzing networks),
 Pathfinding and Navigation (for pathfinding in games or mapping out routes (e.g., solving word ladders or navigating virtual worlds)).
+
+#### Breadth First Search (BFS)
+
+Breadth First Search (BFS) is a fundamental graph traversal algorithm. It explores all neighboring nodes of a vertex before progressing to the next level of neighbors. BFS uses a queue to systematically visit nodes level by level, ensuring that all vertices at the current depth are explored before moving deeper into the graph.
+
+- BFS guarantees finding the shortest path (in terms of the number of edges) in an unweighted graph.
+- It is applicable to both directed and undirected graphs.
+- BFS is an iterative algorithm, relying on a queue to manage visited nodes.
+
+- Time Complexity
+
+  - O(|V| + |E|), where: ∣𝑉∣: Number of vertices in the graph.
+  - ∣𝐸∣: NNumber of edges. BFS processes each vertex and edge exactly once, resulting in a runtime proportional to the size of the graph.
+
+- Space Complexity
+  - O(|V|) for storing the queue and the visited set (or array), as they must hold all vertices in the worst case.
