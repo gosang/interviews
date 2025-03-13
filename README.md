@@ -313,3 +313,26 @@ Radix Sort is a non-comparative sorting algorithm that processes the elements of
   - **Average Case: Θ(nk)**: The runtime remains predictable, as every element is processed 𝑘 times.
 - Space Complexity:
   - **O(n + b)**: Radix Sort requires additional space for 𝑏, the number of buckets (usually equal to the base of the numbering system, e.g., 10 for decimal).
+
+### Graph Algorithms
+
+#### Depth First Search (DFS)
+
+Depth First Search (DFS) is a fundamental graph traversal algorithm. It systematically explores a graph by starting at a source vertex and going as far as possible along one path (branch) before backtracking to explore other paths. This approach uses a stack either explicitly or implicitly (via recursion) to manage visited vertices and ensure proper backtracking.
+
+- DFS traverses each vertex and edge exactly once during the search.
+- It can be applied to both directed and undirected graphs.
+- DFS is particularly useful for problems requiring exploration of all paths, such as finding connected components, detecting cycles, and solving puzzles (e.g., mazes).
+
+Time Complexity
+
+- O(|V| + |E|), where: ∣𝑉∣: Number of vertices in the graph.
+- ∣𝐸∣: Number of edges in the graph. DFS processes all vertices and edges, making its runtime proportional to the size of the graph.
+
+Space Complexity
+
+- O(|V|) for the recursion stack or explicit stack, in the worst case (e.g., a path-like graph with maximum depth).
+
+DFS is powerful and versatile, forming the basis of many graph algorithms like Topological Sorting (Used to order tasks, such as scheduling jobs, resolving package dependencies, or ordering instructions in compilers),
+Strongly Connected Components detection (Find SCCs in directed graphs using Tarjan's or Kosaraju's algorithm, useful in analyzing networks),
+Pathfinding and Navigation (for pathfinding in games or mapping out routes (e.g., solving word ladders or navigating virtual worlds)).
