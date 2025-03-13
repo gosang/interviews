@@ -303,8 +303,13 @@ Bucket Sort is a sorting algorithm that distributes the elements of an array int
 
 #### Radix Sort
 
-- Radix Sort is a sorting algorithm that like bucket sort, distributes elements of an array into a number of buckets. However, radix sort differs from bucket sort by 're-bucketing' the array after the initial pass as opposed to sorting each bucket and merging
+Radix Sort is a non-comparative sorting algorithm that processes the elements of an array by their individual digits or components. Similar to Bucket Sort, it distributes elements into buckets; however, it differs by repeatedly redistributing the elements (or "re-bucketing") based on each digit or positional value, starting from the least significant digit (LSD) to the most significant digit (MSD), or vice versa. The sorted order is achieved after completing all positional passes.
+
+- Stable: Yes (Preserves the relative order of equal elements).
+- In-place: No (Requires additional memory for buckets).
 - Time Complexity:
-  - Best Case: Ω(nk)
-  - Worst Case: O(nk)
-  - Average Case: Θ(nk)
+  - **Best Case: Ω(nk)**: Occurs when the distribution and re-bucketing are highly efficient across 𝑘 passes.
+  - **Worst Case: O(nk)**: Even in the worst case, Radix Sort performs a fixed number of operations per element per digit, making it consistent.
+  - **Average Case: Θ(nk)**: The runtime remains predictable, as every element is processed 𝑘 times.
+- Space Complexity:
+  - **O(n + b)**: Radix Sort requires additional space for 𝑏, the number of buckets (usually equal to the base of the numbering system, e.g., 10 for decimal).
