@@ -420,3 +420,34 @@ The algorithm uses a greedy approach, selecting the shortest known distance at e
 Applications include Network Routing(Find the shortest path in communication and transportation networks),
 Mapping and Navigation(Used in GPS systems to find the shortest route between locations),
 Resource Optimization(Solve problems in logistics, such as determining the fastest delivery routes).
+
+### Bellman-Ford Algorithm
+
+The Bellman-Ford Algorithm is a graph algorithm used to compute the shortest paths from a single source vertex to all other vertices in a weighted graph. Unlike Dijkstra's Algorithm, Bellman-Ford is more versatile as it can handle graphs with negative edge weights. Additionally, it is capable of detecting negative weight cycles, making it a powerful tool for solving more complex graph problems.
+
+- Works with weighted directed and undirected graphs.
+- Can handle negative edge weights (unlike Dijkstra's Algorithm).
+- Detects the presence of negative weight cycles (if a vertex's distance can still be reduced after ∣𝑉∣−1 iterations, a negative weight cycle exists).
+
+Algorithm Steps
+
+- Initialization:
+  - Set the distance to the source vertex as 0 and to all other vertices as infinity (∞).
+- Relaxation:
+  - Iterate ∣𝑉∣−1 times (where ∣𝑉∣ is the number of vertices), relaxing all edges. This means updating the distance of neighboring vertices if a shorter path is found via the current edge.
+- Negative Cycle Check:
+  - Perform one additional iteration to check for negative weight cycles. If any distance can still be reduced, the graph contains a negative cycle.
+
+Time Complexity
+
+- Best Case: O(|E|): Occurs when the graph is sparse and no relaxation is needed after the initial few edges.
+- Worst Case: O(|V| |E|): Happens when the algorithm performs ∣𝑉∣−1 iterations of relaxation over all edges in a dense graph.
+
+Space Complexity
+
+- O(|V|): Space is required to store distances and predecessors for all vertices.
+
+Applications include Shortest Path in Graphs with Negative Weights(Useful in network routing and financial models),
+Negative Weight Cycle Detection(Applied in system analysis to identify issues, such as arbitrage opportunities in currency exchange),
+Logistics and Planning(Solves problems where edge weights represent costs that can be negative (e.g., profit margins or loss reduction)),
+Currency Arbitrage Detection(Identify profitable opportunities in foreign exchange markets)
