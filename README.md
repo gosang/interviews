@@ -277,12 +277,16 @@ Quicksort is a widely used divide-and-conquer sorting algorithm that is known fo
 
 #### Mergesort
 
-- Mergesort is also a divide and conquer algorithm. It continuously divides an array into two halves, recurses on both the left subarray and right subarray and then merges the two sorted halves.
-- Stable: Yes
+Mergesort is is a divide-and-conquer algorithm that recursively splits an array into two halves, sorts each half, and then merges the two sorted halves to produce the final sorted array. It is particularly efficient for large datasets and guarantees stable sorting.
+
+- Stable: Yes (Equal elements retain their relative order).
+- In-place: No (Additional memory is required for merging, making it less space-efficient than Quicksort).
 - Time Complexity:
-  - Best Case: O(nlog(n))
-  - Worst Case: O(nlog(n))
-  - Average Case: O(nlog(n))
+  - **Best Case: O(nlog(n))**: Even in the best case, the array is divided and merged recursively, maintaining logarithmic depth with linear merging.
+  - **Worst Case: O(nlog(n))**: Mergesort performs the same operations regardless of the input order, making it consistent in time complexity.
+  - **Average Case: O(nlog(n))**: Mergesort performs the same operations regardless of the input order, making it consistent in time complexity.
+- Space Complexity:
+  - **O(n)**: Mergesort requires additional memory for temporary arrays during the merging step, making its space usage proportional to the input size.
 
 #### Bucket Sort
 
