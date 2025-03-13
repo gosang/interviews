@@ -233,11 +233,30 @@
 
 ### Graph
 
-- A graph is an ordered pair ( G = (V, E) ) consisting of a set ( V ) of vertices (or nodes) and a set ( E ) of edges (or arcs), where each edge is a 2-element subset of ( V ). In other words, an edge connects two vertices, forming an unordered pair of those vertices.
-  - **Undirected Graph**: In an undirected graph, the adjacency relation is symmetric. This means if there is an edge from node ( u ) to node ( v ) (( u \rightarrow v )), there is also an edge from node ( v ) to node ( u ) (( v \rightarrow u )).
-  - **Directed Graph**: In a directed graph, the adjacency relation is not symmetric. Thus, if there is an edge from node ( u ) to node ( v ) (( u \rightarrow v )), it does not necessarily imply that there is an edge from node ( v ) to node ( u ) (( v \rightarrow u )).
-  - Applications:
-    - Social Networks, Web Graphs, Recommendation systems, Network analysis.
+- A graph is an ordered pair G = (V, E), consisting of:
+  - V: A set of vertices (or nodes).
+  - E: A set of edges (or arcs), where each edge is a 2-element subset of 𝑉 . An edge connects two vertices, forming an unordered pair of those vertices. Graphs are widely used to represent relationships or connections in various systems.
+- Types of Graphs
+  - **Undirected Graph**: In an undirected graph, the adjacency relation is symmetric. This means that if there is an edge from node 𝑢 to node 𝑣(𝑢↔𝑣), there is also an edge from node 𝑣 to node 𝑢 (𝑣 ↔ 𝑢). Essentially, the edges have no direction. Example: A social network where friendships are mutual.
+  - **Directed Graph (Digraph)**: In a directed graph, the adjacency relation is asymmetric. This means that if there is an edge from node 𝑢 to node 𝑣(𝑢→𝑣), it does not necessarily imply that there is an edge from node 𝑣 to node 𝑢 (𝑣→𝑢). The edges have a specific direction. Example: A web graph where hyperlinks point from one webpage to another.
+- Time and Space Complexity of Graphs
+- The complexities of graphs depend on how the graph is represented:
+
+  - Adjacency Matrix Representation
+    - **Time Complexity**
+      - Checking if an edge exists: O(1).
+      - Adding or removing an edge: O(1).
+      - Iterating through all edges: O(V^2), where 𝑉 is the number of vertices.
+    - **Space Complexity**: O(V^2), as it requires a matrix of size 𝑉×𝑉.
+  - Adjacency List Representation
+    - **Time Complexity**
+      - Checking if an edge exists: O(V) in the worst case (if all edges for a vertex need to be searched).
+      - Adding an edge: O(1).
+      - Iterating through all edges: O(V + E), where 𝐸 is the number of edges.
+    - **Space Complexity**: O(V + E), as it stores a list for each vertex containing its adjacent vertices.
+
+- Applications:
+  - Social Networks (Representing connections between individuals (e.g., friendships, followers)), Web Graphs (Visualizing the structure of the World Wide Web (e.g., pages linked by hyperlinks)), Recommendation systems (Identifying relationships between users and items to provide personalized recommendations), Network analysis (Modeling and analyzing complex networks (e.g., transportation systems, communication networks)).
 
 ## Algorithms
 
