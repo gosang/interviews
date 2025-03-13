@@ -290,11 +290,16 @@ Mergesort is is a divide-and-conquer algorithm that recursively splits an array 
 
 #### Bucket Sort
 
-- Bucket Sort is a sorting algorithm that works by distributing the elements of an array into a number of buckets. Each bucket is then sorted individually, either using a different sorting algorithm, or by recursively applying the bucket sorting algorithm
+Bucket Sort is a sorting algorithm that distributes the elements of an array into a predefined number of buckets. Each bucket contains a range of values, and elements within the same range are grouped together. Once distributed, the elements in each bucket are sorted individually, either using another sorting algorithm (e.g., Insertion Sort) or by recursively applying Bucket Sort. Finally, the contents of the buckets are concatenated to produce the sorted array.
+
+- Stable: Depends on the sorting method used within the buckets (Insertion Sort preserves stability).
+- In-place: No (Additional memory is required for buckets).
 - Time Complexity:
-  - Best Case: Ω(n + k)
-  - Worst Case: O(n^2)
-  - Average Case:Θ(n + k)
+  - **Best Case: Ω(n + k)**: Occurs when the data is evenly distributed across buckets, and each bucket contains only a few elements, leading to minimal overhead in sorting individual buckets.
+  - **Worst Case: O(n^2)**: Happens when all elements land in the same bucket, essentially reducing Bucket Sort to a less efficient sorting algorithm like Insertion Sort.
+  - **Average Case:Θ(n + k)**: With reasonably uniform distribution, the sorting process across buckets scales efficiently.
+- Space Complexity:
+  - **O(n + k)**: Additional space is required for the buckets and temporary storage during the sorting process.
 
 #### Radix Sort
 
