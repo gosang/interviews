@@ -451,3 +451,39 @@ Applications include Shortest Path in Graphs with Negative Weights(Useful in net
 Negative Weight Cycle Detection(Applied in system analysis to identify issues, such as arbitrage opportunities in currency exchange),
 Logistics and Planning(Solves problems where edge weights represent costs that can be negative (e.g., profit margins or loss reduction)),
 Currency Arbitrage Detection(Identify profitable opportunities in foreign exchange markets)
+
+### Floyd-Warshall Algorithm
+
+The Floyd-Warshall Algorithm is a dynamic programming algorithm used to find the shortest paths between all pairs of nodes in a weighted graph. It works with graphs that have positive or negative edge weights, as long as there are no negative weight cycles. The algorithm is particularly useful for dense graphs and produces a matrix that represents the shortest path distances between every pair of vertices.
+
+- Finds the shortest path between all pairs of nodes in a single execution.
+- Handles graphs with negative edge weights but not negative weight cycles.
+- The algorithm uses a matrix-based approach to iteratively improve estimates of shortest path distances.
+
+Algorithm Steps
+
+- Initialization
+  - Create a distance matrix where 𝑑𝑖𝑠𝑡[𝑖][𝑗] represents the shortest distance from vertex 𝑖 to vertex 𝑗.
+  - Set 𝑑𝑖𝑠𝑡[𝑖][𝑗] = 0 for all vertices 𝑖, as the distance from a node to itself is zero.
+  - Initialize 𝑑𝑖𝑠𝑡[𝑖][𝑗] with the weight of the edge between 𝑖 and 𝑗 (or ∞ if no edge exists).
+- Dynamic Programming
+  - Use each vertex 𝑘 as an intermediate point and update the distance matrix.
+  - Update 𝑑𝑖𝑠𝑡[𝑖][𝑗] as:
+    - 𝑑𝑖𝑠𝑡[𝑖][𝑗] = min(𝑑𝑖𝑠𝑡[𝑖][𝑗], 𝑑𝑖𝑠𝑡[𝑖][k] + 𝑑𝑖𝑠𝑡[k][𝑗])
+      This ensures the algorithm considers paths passing through 𝑘, improving the shortest path estimates.
+- Result
+  - After ∣𝑉∣ iterations (where ∣𝑉∣ is the number of vertices), the distance matrix contains the shortest path lengths for all pairs of nodes.
+
+Time Complexity
+
+- Best Case: O(|V|³)
+- Worst Case: O(|V|³)
+- Average Case: O(|V|³) The cubic complexity arises from three nested loops over the vertices, making the algorithm most efficient for dense graphs or smaller input sizes.
+
+Space Complexity
+
+- O(|V|²): Space is required to store the distance matrix.
+
+Applications include All-Pairs Shortest Path (Efficiently compute shortest path distances in road networks, communication networks, or any system modeled as a graph),
+Detecting Negative Weight Cycles(A graph has a negative weight cycle if, after completing the algorithm, 𝑑𝑖𝑠𝑡[𝑖][𝑗] < 0 for any vertex 𝑖),
+Routing in Networks(Determine optimal routes in communication or transportation networks).
