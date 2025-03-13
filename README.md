@@ -333,7 +333,7 @@ Space Complexity
 
 - O(|V|) for the recursion stack or explicit stack, in the worst case (e.g., a path-like graph with maximum depth).
 
-DFS is powerful and versatile, forming the basis of many graph algorithms like Topological Sorting (Used to order tasks, such as scheduling jobs, resolving package dependencies, or ordering instructions in compilers),
+Common applications include Topological Sorting (Used to order tasks, such as scheduling jobs, resolving package dependencies, or ordering instructions in compilers),
 Strongly Connected Components detection (Find SCCs in directed graphs using Tarjan's or Kosaraju's algorithm, useful in analyzing networks),
 Pathfinding and Navigation (for pathfinding in games or mapping out routes (e.g., solving word ladders or navigating virtual worlds)).
 
@@ -352,3 +352,31 @@ Breadth First Search (BFS) is a fundamental graph traversal algorithm. It explor
 
 - Space Complexity
   - O(|V|) for storing the queue and the visited set (or array), as they must hold all vertices in the worst case.
+
+Common applications include Shortest Path in Unweighted Graphs (Find the minimum number of edges required to reach a target vertex),
+Level Order Traversal (BFS is used for traversing trees level by level), Solving Puzzles (Used in games and puzzles to explore all possible states (e.g., sliding puzzles, word ladders)).
+
+#### Topological Sort
+
+Topological Sort is a linear ordering of the nodes (or vertices) of a directed acyclic graph (DAG) such that for every directed edge from node
+𝑢 to node 𝑣(𝑢→𝑣), node 𝑢 appears before node 𝑣 in the ordering. It is used to represent dependencies between tasks, making it ideal for scheduling problems.
+
+- Can only be performed on a directed acyclic graph (DAG).
+- If a graph contains cycles, topological sorting is not possible.
+- Multiple valid topological orderings may exist for a single graph.
+- Time Complexity
+
+  - O(|V| + |E|), where: ∣𝑉∣: Number of vertices in the graph.
+  - ∣𝐸∣: Number of edges in the graph. The algorithm visits each vertex and processes all its outgoing edges, resulting in linear complexity.
+
+- Space Complexity
+
+  - O(|V|): Space is required for auxiliary data structures like the in-degree array (or visited set) and the stack or queue.
+
+- Common Algorithms
+  - **Kahn's Algorithm (Using in-degrees and a queue)**: Iteratively removes vertices with no incoming edges and reduces the in-degree of their neighbors.
+  - **DFS-Based Algorithm**: Uses a recursive DFS to traverse the graph and pushes vertices onto a stack when their neighbors are fully explored.
+
+Applications of Topological Sort include Task Scheduling (determine the order in which tasks with dependencies (e.g., jobs, courses) should be executed),
+Precedence Problems (solve problems where certain tasks or actions must be performed before others),
+Project Management (represent activities in a project and ensure the order of execution respects dependencies)
