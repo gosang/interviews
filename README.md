@@ -664,19 +664,31 @@ Analyzing the runtime of algorithms helps us understand their efficiency as inpu
 
 - **Little O Notation (o)**
 
-  - Little O also describes an upper bound for an algorithm, but it is not asymptotically tight.
-  - This means it provides a looser constraint compared to Big O.
+  - Little O also describes an upper bound for an algorithm, but it is not asymptotically tight (i.e., it's an approximation of how the runtime grows).
+    - This means it provides a looser constraint compared to Big O.
+  - Illustration:
+    - You're running a race against time but know you’ll finish faster than an opponent's slowest estimate. Little O tells you the opponent’s slowest runtime without being precise about your actual runtime.
+    - Example: If the runtime of an algorithm is 𝑜(𝑛2), it grows slower than 𝑛2 for large input sizes, but it's not as tightly bound.
 
 - **Big Ω (Omega) Notation (Ω)**
 
   - Big Ω provides an asymptotic lower bound on an algorithm’s runtime.
-  - It describes the best-case scenario or the minimum time an algorithm will take for large inputs.
+    - It describes the best-case scenario or the minimum time an algorithm will take for large inputs.
+  - Illustration:
+    - You're cooking a meal, and some steps (e.g., boiling water) are unavoidable. Big Ω gives the minimum time it will take to complete cooking, no matter how efficiently you handle the other tasks.
+    - Example: If searching an unsorted array takes Ω(𝑛), you must inspect at least 𝑛 elements, even in the best case.
 
 - **Little ω (Omega) Notation (ω)**
 
   - Little ω also provides a lower bound, but it is not asymptotically tight.
-  - It represents a looser lower bound compared to Big Ω.
+    - It represents a looser lower bound compared to Big Ω.
+  - Illustration:
+    - Think of it as a running track where you know you'll cover more distance than the first lane but aren't sure how far exactly.
+    - Example: If an algorithm's runtime is 𝜔(𝑛), it grows faster than 𝑛 for large inputs, but the bound is not precise.
 
 - **Theta (Θ) Notation (Θ)**
   - Theta notation provides a tight bound on an algorithm's runtime.
   - It "sandwiches" the runtime between an upper bound and a lower bound, ensuring both are asymptotically equal for sufficiently large input sizes.
+  - Illustration:
+    - Imagine a bus schedule that specifies a journey will take between 45 and 60 minutes. Theta guarantees the travel time will stay within this range.
+    - Example: If an algorithm has a runtime of Θ(𝑛2), the number of operations is proportional to 𝑛2, both in the best and worst cases.
