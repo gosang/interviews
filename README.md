@@ -575,3 +575,24 @@ For a problem to be solved effectively using a Greedy Algorithm, it must satisfy
 
 - Optimal Substructure The problem exhibits an optimal substructure when the optimal solution to the entire problem can be constructed from the optimal solutions to its subproblems.
 - Greedy Choice Property The problem has the greedy property if a globally optimal solution can be reached by making a series of locally optimal choices, without the need to revisit or reconsider prior decisions.
+
+**Example - Coin Change Problem**
+
+The problem: Given a target amount 𝑉(in cents) and a list of 𝑛 coin denominations, represented as coinValue [𝑖](where 𝑖 ∈ [ 0, 𝑛 − 1 ]), determine the minimum number of coins needed to make up the amount 𝑉. Assume an unlimited supply of coins of each denomination.
+
+For this example, the available coin denominations are: Penny: 1 cent, Nickel: 5 cents, Dime: 10 cents and Quarter: 25 cents.
+
+Let’s solve the problem using the Greedy Algorithm, which repeatedly selects the largest coin denomination less than or equal to the remaining amount
+𝑉. Subtract the value of the selected coin from 𝑉 and continue until 𝑉 = 0.
+
+Assume 𝑉 = 41 cents:
+
+- Initial amount: 𝑉 = 41 cents, Coins used: 0.
+  - Select the largest coin less than or equal to 41 : Quarter (25 cents).
+  - Subtract 25 from 41.
+  - 𝑉 = 41 − 25 = 16. Coins used: 1.
+- 𝑉 = 6 cents, Coins used: 2. 𝑉 = 16 − 10 = 6
+- 𝑉 = 1 cents, Coins used: 3. 𝑉 = 6 − 5 = 1
+- 𝑉 = 0 cents, Coins used: 4. 𝑉 = 1 − 1 = 0
+
+Using the Greedy Algorithm, the target amount 𝑉 = 41 can be represented using a total of 4 coins which is optimal.
