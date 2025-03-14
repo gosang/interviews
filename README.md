@@ -585,14 +585,48 @@ For this example, the available coin denominations are: Penny: 1 cent, Nickel: 5
 Let’s solve the problem using the Greedy Algorithm, which repeatedly selects the largest coin denomination less than or equal to the remaining amount
 𝑉. Subtract the value of the selected coin from 𝑉 and continue until 𝑉 = 0.
 
-Assume 𝑉 = 41 cents:
+Assume 𝑉 = 93 cents:
 
-- Initial amount: 𝑉 = 41 cents, Coins used: 0.
-  - Select the largest coin less than or equal to 41 : Quarter (25 cents).
-  - Subtract 25 from 41.
-  - 𝑉 = 41 − 25 = 16. Coins used: 1.
-- 𝑉 = 6 cents, Coins used: 2. 𝑉 = 16 − 10 = 6
-- 𝑉 = 1 cents, Coins used: 3. 𝑉 = 6 − 5 = 1
-- 𝑉 = 0 cents, Coins used: 4. 𝑉 = 1 − 1 = 0
+- Initial amount: 𝑉 = 93 cents, Coins used: 0.
+  - Select the largest coin less than or equal to 93 : Quarter (25 cents).
+  - Subtract 25 from 93.
+  - 𝑉 = 93 − 25 = 68. Coins used: 1.
+- 𝑉 = 43 cents, Coins used: 2. 𝑉 = 68 − 25 = 43
+- 𝑉 = 18 cents, Coins used: 3. 𝑉 = 43 − 25 = 18
+- 𝑉 = 8 cents, Coins used: 4. 𝑉 = 18 − 10 = 8
+- 𝑉 = 3 cents, Coins used: 5. 𝑉 = 8 − 5 = 3
+- 𝑉 = 2 cents, Coins used: 6. 𝑉 = 3 − 1 = 2
+- 𝑉 = 1 cents, Coins used: 7. 𝑉 = 2 − 1 = 1
+- 𝑉 = 0 cents, Coins used: 8. 𝑉 = 1 − 1 = 0
+  Using the Greedy Algorithm, the target amount 𝑉 = 93 can be represented using a total of 8 coins which is optimal.
 
-Using the Greedy Algorithm, the target amount 𝑉 = 41 can be represented using a total of 4 coins which is optimal.
+**Time Complexity**
+The time complexity of a greedy algorithm is typically determined by:
+
+- Sorting: Many greedy problems require sorting elements first (e.g., sorting activities by finish time or items by value-to-weight ratio), which has a time complexity of
+  𝑂(𝑛log⁡𝑛), where 𝑛 is the number of elements.
+- Iterations: After sorting, the algorithm usually iterates through the input (e.g., selecting activities or coins). This step typically takes 𝑂(𝑛).
+
+Thus, the overall time complexity for most greedy algorithms is: 𝑂(𝑛log⁡𝑛)(dominated by the sorting step).
+
+For cases where sorting is not required, the complexity might just be 𝑂(𝑛), depending on the nature of the problem.
+
+**Space Complexity**
+The space complexity of a greedy algorithm is generally: 𝑂(1) (constant space) if the algorithm operates in-place without requiring additional data structures. However, if the algorithm involves using auxiliary data structures (e.g., arrays, heaps, or lists), the space complexity might increase to:
+
+- 𝑂(𝑛) for storing input data or intermediate results.
+
+**Example Complexities**:
+
+- Activity Selection Problem: 𝑂(𝑛log𝑛) time (due to sorting) and 𝑂(1) space.
+- Huffman Encoding: 𝑂(𝑛log⁡𝑛) time (using a priority queue) and 𝑂(𝑛) space.
+- Dijkstra’s Algorithm: 𝑂((𝑉 - 𝐸 ) log ⁡ 𝑉) time (with a priority queue) and 𝑂 (𝑉 - 𝐸 ) space, where 𝑉 is the number of vertices and 𝐸 is the number of edges.
+
+Applications include Scheduling Problems(Job Scheduling: to schedule tasks on machines or processors to minimize completion time or maximize resource utilization,
+Activity Selection: Selecting the maximum number of non-overlapping activities from a given set, such as optimizing conference room usage),
+Pathfinding and Graph Problems(Dijkstra's Algorithm: A greedy approach is used to find the shortest path from a source node to all other nodes in a weighted graph, useful in GPS navigation systems and routing),
+Resource Allocation(Fractional Knapsack Problem: Determines the maximum value of items that can fit into a knapsack by greedily selecting items with the highest value-to-weight ratio, often applied in financial planning and supply chain optimization),
+Optimization Problems(Coin Change Problem: Greedy strategies are applied to determine the minimum number of coins needed for a specific amount, often used in automated cash registers,
+Interval Covering Problems: Such as selecting minimum intervals to cover a certain range, useful in broadcasting and signal allocation.),
+Real-Time Systems(Task Assignment: Allocating tasks in real-time systems to minimize delay or maximize throughput, such as in operating systems or load balancing on servers.),
+Dynamic Pricing(In e-commerce and airline ticket pricing, greedy methods optimize revenue by continuously adjusting prices based on demand and inventory levels).
