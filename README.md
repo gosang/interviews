@@ -573,8 +573,8 @@ Greedy Algorithms are a class of algorithms that make a series of locally optima
 
 For a problem to be solved effectively using a Greedy Algorithm, it must satisfy two key properties:
 
-- Optimal Substructure The problem exhibits an optimal substructure when the optimal solution to the entire problem can be constructed from the optimal solutions to its subproblems.
-- Greedy Choice Property The problem has the greedy property if a globally optimal solution can be reached by making a series of locally optimal choices, without the need to revisit or reconsider prior decisions.
+- **Optimal Substructure**: The problem exhibits an optimal substructure when the optimal solution to the entire problem can be constructed from the optimal solutions to its subproblems.
+- **Greedy Choice Property**: The problem has the greedy property if a globally optimal solution can be reached by making a series of locally optimal choices, without the need to revisit or reconsider prior decisions.
 
 **Example - Coin Change Problem**
 
