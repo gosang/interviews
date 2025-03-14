@@ -622,14 +622,22 @@ The space complexity of a greedy algorithm is generally: 𝑂(1) (constant space
 - Huffman Encoding: 𝑂(𝑛log⁡𝑛) time (using a priority queue) and 𝑂(𝑛) space.
 - Dijkstra’s Algorithm: 𝑂((𝑉 - 𝐸 ) log ⁡ 𝑉) time (with a priority queue) and 𝑂 (𝑉 - 𝐸 ) space, where 𝑉 is the number of vertices and 𝐸 is the number of edges.
 
-Applications include Scheduling Problems(Job Scheduling: to schedule tasks on machines or processors to minimize completion time or maximize resource utilization,
-Activity Selection: Selecting the maximum number of non-overlapping activities from a given set, such as optimizing conference room usage),
-Pathfinding and Graph Problems(Dijkstra's Algorithm: A greedy approach is used to find the shortest path from a source node to all other nodes in a weighted graph, useful in GPS navigation systems and routing),
-Resource Allocation(Fractional Knapsack Problem: Determines the maximum value of items that can fit into a knapsack by greedily selecting items with the highest value-to-weight ratio, often applied in financial planning and supply chain optimization),
-Optimization Problems(Coin Change Problem: Greedy strategies are applied to determine the minimum number of coins needed for a specific amount, often used in automated cash registers,
-Interval Covering Problems: Such as selecting minimum intervals to cover a certain range, useful in broadcasting and signal allocation.),
-Real-Time Systems(Task Assignment: Allocating tasks in real-time systems to minimize delay or maximize throughput, such as in operating systems or load balancing on servers.),
-Dynamic Pricing(In e-commerce and airline ticket pricing, greedy methods optimize revenue by continuously adjusting prices based on demand and inventory levels).
+Applications include:
+
+- Scheduling Problems
+  - Job Scheduling: to schedule tasks on machines or processors to minimize completion time or maximize resource utilization.
+  - Activity Selection: Selecting the maximum number of non-overlapping activities from a given set, such as optimizing conference room usage.
+- Pathfinding and Graph Problems
+  - Dijkstra's Algorithm: A greedy approach is used to find the shortest path from a source node to all other nodes in a weighted graph, useful in GPS navigation systems and routing.
+- Resource Allocation
+  - Fractional Knapsack Problem: Determines the maximum value of items that can fit into a knapsack by greedily selecting items with the highest value-to-weight ratio, often applied in financial planning and supply chain optimization.
+- Optimization Problems
+  - Coin Change Problem: Greedy strategies are applied to determine the minimum number of coins needed for a specific amount, often used in automated cash registers.
+  - Interval Covering Problems: Such as selecting minimum intervals to cover a certain range, useful in broadcasting and signal allocation.
+- Real-Time Systems
+  - Task Assignment: Allocating tasks in real-time systems to minimize delay or maximize throughput, such as in operating systems or load balancing on servers.
+- Dynamic Pricing
+  - In e-commerce and airline ticket pricing, greedy methods optimize revenue by continuously adjusting prices based on demand and inventory levels.
 
 ### Bitmasking
 
