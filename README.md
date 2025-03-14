@@ -630,3 +630,53 @@ Optimization Problems(Coin Change Problem: Greedy strategies are applied to dete
 Interval Covering Problems: Such as selecting minimum intervals to cover a certain range, useful in broadcasting and signal allocation.),
 Real-Time Systems(Task Assignment: Allocating tasks in real-time systems to minimize delay or maximize throughput, such as in operating systems or load balancing on servers.),
 Dynamic Pricing(In e-commerce and airline ticket pricing, greedy methods optimize revenue by continuously adjusting prices based on demand and inventory levels).
+
+### Bitmasking
+
+Bitmasking is a powerful technique used to manipulate data at the bit level. By operating directly on binary representations, bitmasks enable faster computations and reduce memory usage, making them ideal for solving problems efficiently.
+
+Here are some common bitmasking operations:
+
+- Test the 𝑘-th Bit Check if the 𝑘-th bit is set (1): s & (1 << k)
+- Set the 𝑘-th Bit Turn on (set to 1) the 𝑘-th bit: s |= (1 << k)
+- Turn Off the 𝑘-th Bit Turn off (set to 0) the 𝑘-th bit: s &= ~(1 << k)
+- Toggle the 𝑘-th Bit Flip the state of the 𝑘-th bit (1 becomes 0, and vice versa): s ^= (1 << k)
+- Multiply by 2𝑛 Left shift by 𝑛 bits (equivalent to multiplying by 2𝑛): s << n
+- Divide by 2𝑛 Right shift by 𝑛 bits (equivalent to dividing by 2𝑛): s >> n
+- Intersection of Two Sets Retain only the common bits between two numbers: s & t
+- Union of Two Sets Combine the set bits from two numbers: s | t
+- Set Subtraction Remove all bits in 𝑡 from 𝑠: s & ~t
+- Extract the Lowest Set Bit Isolate the rightmost bit that is set (1): s & (-s)
+- Extract the Lowest Unset Bit Identify the first unset (0) bit from the right: ~s & (s + 1)
+- Swap Two Values Without a Temporary Variable Swap two integers 𝑥 and 𝑦 using XOR: x ^= y; y ^= x; x ^= y;
+
+### Runtime Analysis
+
+Analyzing the runtime of algorithms helps us understand their efficiency as input sizes grow. Various notations are used to describe the asymptotic behavior of algorithms:
+
+- **Big O Notation (O)**
+
+  - Big O describes the upper bound of an algorithm’s runtime.
+    - It characterizes the worst-case scenario, providing the maximum time an algorithm may take as input size increases.
+  - Illustration:
+    - Imagine you're delivering packages, and there's unexpected traffic on the route. Big O gives the maximum time it might take for you to complete your deliveries.
+    - Example: If sorting an array takes 𝑂(𝑛log𝑛), this means at most 𝑛log𝑛 operations are required, regardless of the specific input arrangement.
+
+- **Little O Notation (o)**
+
+  - Little O also describes an upper bound for an algorithm, but it is not asymptotically tight.
+  - This means it provides a looser constraint compared to Big O.
+
+- **Big Ω (Omega) Notation (Ω)**
+
+  - Big Ω provides an asymptotic lower bound on an algorithm’s runtime.
+  - It describes the best-case scenario or the minimum time an algorithm will take for large inputs.
+
+- **Little ω (Omega) Notation (ω)**
+
+  - Little ω also provides a lower bound, but it is not asymptotically tight.
+  - It represents a looser lower bound compared to Big Ω.
+
+- **Theta (Θ) Notation (Θ)**
+  - Theta notation provides a tight bound on an algorithm's runtime.
+  - It "sandwiches" the runtime between an upper bound and a lower bound, ensuring both are asymptotically equal for sufficiently large input sizes.
