@@ -566,3 +566,12 @@ Applications include Network Design(Optimize cost for constructing communication
 Clustering(Used in hierarchical clustering algorithms to group similar items),
 Approximation Algorithms(Applied in problems requiring the construction of low-cost networks),
 Forest Construction(Handles disconnected graphs effectively by creating a minimum spanning forest),
+
+### Greedy Algorithms
+
+Greedy Algorithms are a class of algorithms that make a series of locally optimal choices at each step, with the intention of ultimately arriving at a globally optimal solution. While this approach is simple and often efficient, it works only for certain types of problems.
+
+For a problem to be solved effectively using a Greedy Algorithm, it must satisfy two key properties:
+
+- Optimal Substructure The problem exhibits an optimal substructure when the optimal solution to the entire problem can be constructed from the optimal solutions to its subproblems.
+- Greedy Choice Property The problem has the greedy property if a globally optimal solution can be reached by making a series of locally optimal choices, without the need to revisit or reconsider prior decisions.
