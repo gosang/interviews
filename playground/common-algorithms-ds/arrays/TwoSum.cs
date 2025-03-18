@@ -1,4 +1,64 @@
-// Problem: Given an array nums and integer target, return indices of two numbers that sum to target.
+// Problem: Given an array nums and an integer target, return the indices of two numbers that add up to the target. 
+// Assume there’s exactly one solution, and you can’t use the same element twice.
+
+
+// Brute Force Solution
+// Explanation: The brute force approach involves checking every possible pair of numbers in the array to see if 
+// their sum equals the target. We use two nested loops: the outer loop picks the first number, 
+// and the inner loop picks the second number from the remaining elements. If a pair sums to the target, 
+// we return their indices. This is straightforward but inefficient because it examines all possible combinations 
+// without leveraging any data structure to optimize lookups.
+
+// Time Complexity: O(n²) - The outer loop runs n times, and the inner loop runs up to n-1 times, 
+// leading to a quadratic number of comparisons.
+// Space Complexity: O(1) - Only a constant amount of extra space is used for variables, regardless of input size.
+
+
+public class BruteForceTwoSum{
+    public static int[] TwoSumBruteForce(int[] nums, int target) {
+        for (int i = 0; i < nums.Length; i++) {
+            for (int j = i + 1; j < nums.Length; j++) {
+                if (nums[i] + nums[j] == target) {
+                    return new int[] { i, j };
+                }
+            }
+        }
+        return []; // No solution found
+    }
+}
+
+
+// Optimal Solution
+// Explanation: The optimal solution uses a hash table (Dictionary in C#) to store numbers and their indices 
+// as we iterate through the array. For each number, we compute its complement (target - current number) 
+// and check if it exists in the hash table. If it does, we’ve found a pair, and we return their indices. 
+// If not, we add the current number and its index to the hash table. This approach reduces the problem 
+// to a single pass with constant-time lookups, making it far more efficient than brute force.
+
+// Time Complexity: O(n) - We iterate through the array once, and hash table operations (lookup and insertion) 
+// are O(1) on average.
+// Space Complexity: O(n) - The hash table stores up to n elements in the worst case.
+
+
+public class OptimalTwoSum {
+    public int[] TwoSum(int[] nums, int target) {
+        Dictionary<int, int> numMap = new Dictionary<int, int>();
+        for (int i = 0; i < nums.Length; i++) {
+            int complement = target - nums[i];
+            if (numMap.ContainsKey(complement)) {
+                return new int[] { numMap[complement], i };
+            }
+            numMap[nums[i]] = i;
+        }
+        return []; // No solution found
+    }
+}
+
+// Example
+// int[] nums = { 2, 7, 11, 15 };
+// int target = 9;
+// int[] result = new OptimalTwoSum().TwoSum(nums, target); // [0, 1]
+
 
 // Divide-and-Conquer Solution
 // Explanation: Split the array into two halves, recursively search for pairs within each half, 
@@ -29,25 +89,3 @@ public class DivideConquerTwoSum {
     }
 }
 
-
-// Optimal Solution
-// Explanation: Use a hash table to store complements, achieving linear time.
-// Time Complexity: O(n), Space Complexity: O(n)
-
-public class TwoSum {
-    public int[] TwoSum(int[] nums, int target) {
-        Dictionary<int, int> numMap = new Dictionary<int, int>();
-        for (int i = 0; i < nums.Length; i++) {
-            int complement = target - nums[i];
-            if (numMap.ContainsKey(complement)) return [numMap[complement], i];
-            numMap[nums[i]] = i;
-        }
-        return [];
-    }
-}
-
-
-// Example
-// int[] nums = { 2, 7, 11, 15 };
-// int target = 9;
-// int[] result = new Solution().TwoSum(nums, target); // [0, 1]
