@@ -52,19 +52,21 @@ public class DivideConquerFrequentElement {
 }
 
 
-// Optimal Solution
-// Explanation: Use a dictionary and min-heap for O(n log k) time.
-// Time Complexity: O(n log k), Space Complexity: O(n)
+// Optimal Solution (Use a dictionary and min-heap for O(n log k) time)
+
+// The optimal solution uses a min-heap to maintain the k most frequent elements. We first count frequencies with a dictionary, then insert each element-frequency pair into a min-heap of size k. If the heap exceeds k, we remove the smallest frequency element. This avoids sorting the entire dictionary and limits heap operations to k elements, making it more efficient for large n when k is small.
+// Time Complexity: O(n log k) - O(n) to build the dictionary, O(n log k) to process n elements with a heap of size k.
+// Space Complexity: O(n) - Dictionary stores n elements, heap stores k elements.
 
 
 public class OptimalFrequentElement {
     public int[] TopKFrequent(int[] nums, int k) {
-        var count = new Dictionary<int, int>();
+        Dictionary<int, int> count = new Dictionary<int, int>();
         foreach (int num in nums) {
             count[num] = count.GetValueOrDefault(num, 0) + 1;
         }
         
-        var pq = new PriorityQueue<int, int>(Comparer<int>.Create((a, b) => a - b));
+        var pq = new PriorityQueue<int, int>(Comparer<int>.Create((a, b) => a - b)); // Min-heap
         foreach (var kvp in count) {
             pq.Enqueue(kvp.Key, kvp.Value);
             if (pq.Count > k) pq.Dequeue();
@@ -77,3 +79,8 @@ public class OptimalFrequentElement {
         return result;
     }
 }
+
+// Example usage
+// int[] nums = { 1, 1, 1, 2, 2, 3 };
+// int k = 2;
+// int[] result = new OptimalFrequentElement().TopKFrequent(nums, k); // Output: [1, 2]
