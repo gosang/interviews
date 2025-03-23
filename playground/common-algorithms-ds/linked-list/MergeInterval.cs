@@ -69,8 +69,9 @@ public class DivideConquerMergeIntervals {
 
 
 // Optimal Solution
-// Explanation: Sort by start time and merge in a single pass.
-// Time Complexity: O(n log n), Space Complexity: O(n)
+// The optimal solution first sorts the intervals by their start times, which allows us to process them sequentially and merge overlaps in a single pass. We maintain a list of merged intervals, starting with the first interval. For each subsequent interval, we check if it overlaps with the last merged interval (i.e., its start is less than or equal to the last end). If it does, we update the end of the last interval to the maximum of the current ends; otherwise, we add the new interval to the list. Sorting ensures we only need to compare adjacent intervals, making this much more efficient.
+// Time Complexity: O(n log n) - Sorting dominates, followed by a single O(n) pass.
+// Space Complexity: O(n) - The output list stores the merged intervals.
 
 public class MergeIntervals {
     public int[][] Merge(int[][] intervals) {
@@ -90,6 +91,6 @@ public class MergeIntervals {
     }
 }
 
-// Example
-// int[][] intervals = { new int[] { 1, 3 }, new int[] { 2, 6 } };
-// int[][] result = new Solution().Merge(intervals); // [[1,6]]
+// Example usage
+// int[][] intervals = { new int[] { 1, 3 }, new int[] { 2, 6 }, new int[] { 8, 10 } };
+// int[][] result = new MergeIntervals().Merge(intervals); // Output: [[1,6],[8,10]]
