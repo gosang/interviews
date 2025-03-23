@@ -1,5 +1,24 @@
 // Valid Parentheses
-// Problem: Check if a string of brackets is valid.
+// Problem: Given a string s containing (, ), {, }, [, ], determine if it’s valid (brackets close in the correct order).
+
+//Brute Force Solution
+// The brute force approach repeatedly scans the string and removes matching pairs of brackets (e.g., "()", "{}", "[]") until no more pairs can be removed. If the string becomes empty, it’s valid; if it stops shrinking but isn’t empty, it’s invalid. This is inefficient because it requires multiple passes over the string, and each pass involves string manipulation, which is costly.
+// Time Complexity: O(n²) - Each pass takes O(n) to scan and replace, and up to O(n) passes may be needed.
+// Space Complexity: O(n) - New strings are created during replacement.
+
+public class BruteForceValidParanthense{
+    public bool IsValidBruteForce(string s) {
+        while (s.Length > 0) {
+            int len = s.Length;
+            s = s.Replace("()", "").Replace("{}", "").Replace("[]", "");
+            if (s.Length == len) return false; // No changes, invalid
+        }
+        return true;
+    }
+}
+
+
+
 // Divide-and-Conquer Solution
 // Explanation: Split the string and validate each half, ensuring proper nesting across boundaries. Inefficient due to substring checks.
 // Time Complexity: O(n²), Space Complexity: O(n)
