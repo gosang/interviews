@@ -56,9 +56,10 @@ public class DivideConquerMergeArray {
 }
 
 
-// Optimal Solution
-// Explanation: Merge from the end to avoid extra space.
-// Time Complexity: O(m + n), Space Complexity: O(1)
+// Optimal Solution (Merge from the end to avoid extra space)
+// The optimal solution merges the arrays in-place from the end, leveraging the extra space in nums1. We use three pointers: p1 for the end of nums1’s initial elements, p2 for the end of nums2, and p for the end of the merged array. We compare elements from nums1 and nums2, placing the larger one at p and moving the respective pointer, continuing until all elements are merged. This avoids extra space and takes advantage of the sorted property.
+// Time Complexity: O(m + n) - Single pass through both arrays.
+// Space Complexity: O(1) - No extra space beyond pointers.
 
 public class OptimalMergeArray {
     public void Merge(int[] nums1, int m, int[] nums2, int n) {
@@ -69,3 +70,10 @@ public class OptimalMergeArray {
         while (p2 >= 0) nums1[p--] = nums2[p2--];
     }
 }
+
+// Example usage
+// int[] nums1 = { 1, 2, 3, 0, 0, 0 };
+// int m = 3;
+// int[] nums2 = { 2, 5, 6 };
+// int n = 3;
+// new Solution().Merge(nums1, m, nums2, n); // nums1: [1,2,2,3,5,6]
