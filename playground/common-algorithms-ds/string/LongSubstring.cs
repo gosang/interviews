@@ -69,8 +69,10 @@ public class DivideConquerLongestSubstring {
 }
 
 // Optimal Solution
-// Explanation: Use a sliding window with a dictionary for O(n) time.
-// Time Complexity: O(n), Space Complexity: O(min(m, n))
+// The optimal solution uses a sliding window approach with a dictionary to track the last index of each character. We maintain two pointers: start (window start) and end (current position). As we move end through the string, if we encounter a character already in the window (i.e., its last index is >= start), we move start to the position after that last occurrence. We update the maximum length each time the window expands without duplicates. This avoids checking all substrings and reduces the problem to a single pass.
+// Time Complexity: O(n) - Single pass through the string, with O(1) dictionary operations.
+// Space Complexity: O(min(m, n)) - Dictionary size depends on the character set (m) or string length (n).
+
 
 public class LongestSubstring {
     public int LengthOfLongestSubstring(string s) {
@@ -89,6 +91,6 @@ public class LongestSubstring {
     }
 }
 
-// Example
+// Example usage
 // string s = "abcabcbb";
-// int result = new Solution().LengthOfLongestSubstring(s); // 3
+// int result = new LongestSubstring().LengthOfLongestSubstring(s); // Output: 3 ("abc")
