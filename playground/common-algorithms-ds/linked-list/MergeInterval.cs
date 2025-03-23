@@ -1,4 +1,38 @@
-// Problem: Merge overlapping intervals from a list like [[1,3],[2,6],[8,10]].
+// Problem: Given a collection of intervals (e.g., [[1,3],[2,6],[8,10],[15,18]]), merge all overlapping intervals and return the result.
+
+// Brute Force Solution
+// In the brute force approach, we start with the list of intervals and repeatedly compare each interval with every other to check for overlaps. If two intervals overlap (i.e., the start of one is less than or equal to the end of the other), we merge them by taking the minimum start and maximum end, remove the second interval, and continue this process until no more merges are possible. This is inefficient because it requires multiple passes over the list and repeated comparisons, even after merging.
+
+// Time Complexity: O(n²) - Each interval may need to be compared with all others, and this process repeats until no overlaps remain.
+// Space Complexity: O(n) - We store the merged intervals in a list, which can grow or shrink but is bounded by the input size.
+
+public class BruteForceMergeIntervals {
+    public int[][] MergeBruteForce(int[][] intervals) {
+        List<int[]> result = new List<int[]>(intervals);
+        bool changed;
+        do {
+            changed = false;
+            for (int i = 0; i < result.Count; i++) {
+                for (int j = i + 1; j < result.Count; j++) {
+                    if (Overlaps(result[i], result[j])) {
+                        result[i] = new int[] { Math.Min(result[i][0], result[j][0]), Math.Max(result[i][1], result[j][1]) };
+                        result.RemoveAt(j);
+                        changed = true;
+                        break;
+                    }
+                }
+                if (changed) break;
+            }
+        } while (changed);
+        return result.ToArray();
+    }
+    
+    private bool Overlaps(int[] a, int[] b) {
+        return a[0] <= b[1] && b[0] <= a[1];
+    }
+}
+
+
 // Divide-and-Conquer Solution
 // Explanation: Split intervals into two halves, recursively merge each half, then merge the results across the split. Sorting is still required initially.
 // Time Complexity: O(n log n), Space Complexity: O(n)
