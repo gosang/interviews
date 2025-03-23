@@ -1,5 +1,20 @@
 // Top K Frequent Elements
-// Problem: Return the k most frequent elements in an array.
+// Problem: Given an array nums and integer k, return the k most frequent elements in any order.
+
+// Brute Force Solution
+// The brute force approach first counts the frequency of each element using a dictionary. Then, it sorts the dictionary entries by frequency in descending order and takes the top k elements. This relies on sorting, which is computationally expensive, especially for large arrays, but it’s simple and guarantees correctness.
+// Time Complexity: O(n log n) - Building the dictionary is O(n), but sorting the dictionary (with potentially n unique elements) is O(n log n).
+// Space Complexity: O(n) - The dictionary stores up to n elements.
+
+public class BruteForceFrequentElement {
+    public int[] TopKFrequentBruteForce(int[] nums, int k) {
+        Dictionary<int, int> count = new Dictionary<int, int>();
+        foreach (int num in nums) {
+            count[num] = count.GetValueOrDefault(num, 0) + 1;
+        }
+        return count.OrderByDescending(x => x.Value).Take(k).Select(x => x.Key).ToArray();
+    }
+}
 
 
 // Divide-and-Conquer Solution
