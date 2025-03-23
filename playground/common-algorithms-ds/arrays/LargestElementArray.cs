@@ -1,11 +1,24 @@
 // Kth Largest Element in an Array
 // Problem: Find the kth largest element in an unsorted array.
 
+
+// Brute Force Solution
+// The brute force approach sorts the entire array in ascending order, then returns the element at index n - k (where n is the array length). This is simple but inefficient because sorting the whole array is overkill when we only need the kth largest element.
+// Time Complexity: O(n log n) - Sorting the array.
+// Space Complexity: O(1) - In-place sorting (assuming Array.Sort modifies the input).
+
+public class BruteForceFindKthLargest {
+    public int FindKthLargestBruteForce(int[] nums, int k) {
+        Array.Sort(nums);
+        return nums[nums.Length - k];
+    }
+}
+
 // Divide-and-Conquer Solution
 // Explanation: Use quickselect with partitioning.
 // Time Complexity: O(n) average, Space Complexity: O(1)
 
-public class DivideConquerFindKthLarges {
+public class DivideConquerFindKthLargest {
     public int FindKthLargestDivideConquer(int[] nums, int k) {
         return QuickSelect(nums, 0, nums.Length - 1, nums.Length - k);
     }
@@ -39,7 +52,7 @@ public class DivideConquerFindKthLarges {
 // Explanation: Use a min-heap of size k.
 // Time Complexity: O(n log k), Space Complexity: O(k)
 
-public class OptimalFindKthLarges {
+public class OptimalFindKthLargest {
     public int FindKthLargest(int[] nums, int k) {
         var pq = new PriorityQueue<int, int>(Comparer<int>.Create((a, b) => a - b));
         foreach (int num in nums) {
