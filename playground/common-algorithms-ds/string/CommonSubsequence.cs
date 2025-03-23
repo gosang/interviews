@@ -38,10 +38,10 @@ public class DivideConquerCommonSubsequence {
     }
 }
 
-// Optimal Solution
-
-// Explanation: Use dynamic programming with a 2D array.
-// Time Complexity: O(m * n), Space Complexity: O(m * n)
+// Optimal Solution (Use dynamic programming with a 2D array)
+// The optimal solution uses dynamic programming with a 2D array dp, where dp[i,j] represents the LCS length for prefixes text1[0..i-1] and text2[0..j-1]. We fill the array bottom-up: if characters match, we add 1 to the diagonal value; otherwise, we take the maximum of skipping one character from either string. This avoids redundant computations and solves the problem efficiently.
+// Time Complexity: O(m * n) - Fill a 2D table of size m * n.
+// Space Complexity: O(m * n) - Size of the DP table.
 
 public class OptimalCommonSubsequence {
     public int LongestCommonSubsequence(string text1, string text2) {
@@ -57,3 +57,7 @@ public class OptimalCommonSubsequence {
         return dp[m, n];
     }
 }
+
+// Example usage
+// string text1 = "abcde", text2 = "ace";
+// int result = new OptimalCommonSubsequence().LongestCommonSubsequence(text1, text2); // Output: 3 ("ace")
