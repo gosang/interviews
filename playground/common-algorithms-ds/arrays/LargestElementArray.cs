@@ -48,13 +48,14 @@ public class DivideConquerFindKthLargest {
     }
 }
 
-// Optimal Solution
-// Explanation: Use a min-heap of size k.
-// Time Complexity: O(n log k), Space Complexity: O(k)
+// Optimal Solution (Use a min-heap of size k)
+// The optimal solution uses a min-heap of size k. We iterate through the array, adding each element to the heap. If the heap size exceeds k, we remove the smallest element. At the end, the heap contains the k largest elements, and the top is the kth largest. This is more efficient than sorting because heap operations are logarithmic in k, not n, and k is typically smaller than n.
+// Time Complexity: O(n log k) - O(n) elements, each with O(log k) heap operations.
+// Space Complexity: O(k) - Heap stores k elements.
 
 public class OptimalFindKthLargest {
     public int FindKthLargest(int[] nums, int k) {
-        var pq = new PriorityQueue<int, int>(Comparer<int>.Create((a, b) => a - b));
+        var pq = new PriorityQueue<int, int>(Comparer<int>.Create((a, b) => a - b)); // Min-heap
         foreach (int num in nums) {
             pq.Enqueue(num, num);
             if (pq.Count > k) pq.Dequeue();
@@ -62,3 +63,8 @@ public class OptimalFindKthLargest {
         return pq.Dequeue();
     }
 }
+
+// Example usage
+// int[] nums = { 3, 2, 1, 5, 6, 4 };
+// int k = 2;
+// int result = new OptimalFindKthLargest().FindKthLargest(nums, k); // Output: 5
