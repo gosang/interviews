@@ -1,5 +1,39 @@
 // Binary Tree Level Order Traversal
-// Problem: Return level-order traversal of a binary tree.
+// Problem: Given a binary tree, return its level-order traversal (left to right, level by level).
+
+// Brute Force Solution
+// The brute force approach first calculates the height of the tree to determine the number of levels. Then, for each level, it performs a preorder traversal, collecting nodes at that specific level into a list. This is inefficient because it requires multiple traversals of the tree (one per level) and doesn’t take advantage of a queue-based approach to process nodes level by level in a single pass.
+
+// Time Complexity: O(n * h) - O(n) nodes visited per level, and h levels (h ≈ log n for balanced trees, n for skewed).
+// Space Complexity: O(n) - Store the result list, plus O(h) recursion stack.
+
+public class BruteForceOrderLevel {
+     public IList<IList<int>> LevelOrderBruteForce(TreeNode root) {
+        List<IList<int>> result = new List<IList<int>>();
+        if (root == null) return result;
+        
+        int height = GetHeight(root);
+        for (int level = 0; level < height; level++) {
+            List<int> currentLevel = new List<int>();
+            CollectLevel(root, level, 0, currentLevel);
+            result.Add(currentLevel);
+        }
+        return result;
+    }
+    
+    private int GetHeight(TreeNode node) {
+        if (node == null) return 0;
+        return 1 + Math.Max(GetHeight(node.left), GetHeight(node.right));
+    }
+    
+    private void CollectLevel(TreeNode node, int targetLevel, int currentLevel, List<int> level) {
+        if (node == null) return;
+        if (currentLevel == targetLevel) level.Add(node.val);
+        CollectLevel(node.left, targetLevel, currentLevel + 1, level);
+        CollectLevel(node.right, targetLevel, currentLevel + 1, level);
+    }
+}
+
 
 // Divide-and-Conquer Solution
 // Explanation: Recursively process left and right subtrees, merging levels. Less efficient than BFS.
