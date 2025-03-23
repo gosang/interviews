@@ -1,5 +1,23 @@
 // Merge Sorted Array
-// Problem: Merge two sorted arrays nums1 and nums2 into nums1.
+// Problem: Merge two sorted arrays nums1 (with space) and nums2 into nums1.
+
+
+// Brute Force Solution
+// The brute force approach copies both arrays into a single temporary array, sorts it, and then copies it back to nums1. This ignores the fact that the input arrays are already sorted, making it unnecessarily expensive due to the sorting step. It’s simple but inefficient for this specific problem.
+// Time Complexity: O((m + n) log(m + n)) - Sorting the combined array.
+// Space Complexity: O(m + n) - Temporary array.
+
+public class BruteForceMergeArray {
+    public void MergeBruteForce(int[] nums1, int m, int[] nums2, int n) {
+        int[] temp = new int[m + n];
+        Array.Copy(nums1, 0, temp, 0, m);
+        Array.Copy(nums2, 0, temp, m, n);
+        Array.Sort(temp);
+        Array.Copy(temp, nums1, m + n);
+    }
+}
+
+
 // Divide-and-Conquer Solution
 // Explanation: Split and merge recursively like merge sort.
 // Time Complexity: O(m + n log(m + n)), Space Complexity: O(m + n)
