@@ -1,5 +1,33 @@
 // Longest Substring Without Repeating Characters
-// Problem: Find the length of the longest substring without repeating characters.
+// Problem: Given a string s, find the length of the longest substring without repeating characters.
+
+// Brute Force Solution
+// The brute force approach generates all possible substrings by using two nested loops to define start and end indices. For each substring, we check if it contains unique characters by adding them to a set and verifying no duplicates occur. We track the maximum length encountered. This is highly inefficient because it generates O(n²) substrings and checks each in O(n) time, leading to a cubic complexity.
+// Time Complexity: O(n³) - O(n²) substrings, each checked in O(n) time.
+// Space Complexity: O(n) - The set used to check uniqueness can store up to n characters.
+
+public class BruteForceLongestSubstring {
+    public int LengthOfLongestSubstringBruteForce(string s) {
+        int maxLength = 0;
+        for (int i = 0; i < s.Length; i++) {
+            for (int j = i; j < s.Length; j++) {
+                if (IsUnique(s, i, j)) {
+                    maxLength = Math.Max(maxLength, j - i + 1);
+                }
+            }
+        }
+        return maxLength;
+    }
+    
+    private bool IsUnique(string s, int start, int end) {
+        HashSet<char> set = new HashSet<char>();
+        for (int i = start; i <= end; i++) {
+            if (!set.Add(s[i])) return false;
+        }
+        return true;
+    }
+}
+
 
 // Divide-and-Conquer Solution
 // Explanation: Split the string and check substrings, merging results by considering boundaries. 
