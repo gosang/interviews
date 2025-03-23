@@ -67,20 +67,22 @@ public class DivideConquerOrderLevel {
 
 
 // Optimal Solution
-// Explanation: Use BFS with a queue for O(n) time.
-// Time Complexity: O(n), Space Complexity: O(w)
+
+// The optimal solution uses Breadth-First Search (BFS) with a queue. We start by enqueuing the root, then process nodes level by level. For each level, we dequeue all nodes at that level (using the queue’s size to determine the level size), add their values to a list, and enqueue their children. This ensures each node is visited exactly once in level order, making it far more efficient than multiple traversals.
+// Time Complexity: O(n) - Each node is enqueued and dequeued once.
+// Space Complexity: O(w) - Queue holds at most the maximum width of the tree (w), plus O(n) for the result.
 
 public class OptimalLevelOrder {
     public IList<IList<int>> LevelOrder(TreeNode root) {
-        var result = new List<IList<int>>();
+        List<IList<int>> result = new List<IList<int>>();
         if (root == null) return result;
         
-        var queue = new Queue<TreeNode>();
+        Queue<TreeNode> queue = new Queue<TreeNode>();
         queue.Enqueue(root);
         
         while (queue.Count > 0) {
-            var levelSize = queue.Count;
-            var currentLevel = new List<int>();
+            int levelSize = queue.Count;
+            List<int> currentLevel = new List<int>();
             
             for (int i = 0; i < levelSize; i++) {
                 TreeNode node = queue.Dequeue();
@@ -94,3 +96,6 @@ public class OptimalLevelOrder {
     }
 }
 
+// Example usage
+// TreeNode root = new TreeNode(3, new TreeNode(9), new TreeNode(20, new TreeNode(15), new TreeNode(7)));
+// var result = new Solution().LevelOrder(root); // Output: [[3],[9,20],[15,7]]
