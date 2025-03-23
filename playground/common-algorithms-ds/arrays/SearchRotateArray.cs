@@ -43,10 +43,10 @@ public class DivideConquerSearchRotateArray {
 }
 
 
-// Optimal Solution
-
-// Explanation: Iterative binary search with rotation handling.
-// Time Complexity: O(log n), Space Complexity: O(1)
+// Optimal Solution (Iterative binary search with rotation handling)
+// The optimal solution uses a modified binary search that accounts for the rotation. We maintain two pointers, left and right, and compute the midpoint. We determine which half is sorted by comparing nums[left] with nums[mid]. If the left half is sorted, we check if the target lies within it; if so, we search there, otherwise the right half. If the right half is sorted, we apply the same logic. This reduces the search space by half each step, leveraging the partial sorting.
+// Time Complexity: O(log n) - Binary search halves the search space each iteration.
+// Space Complexity: O(1) - Only pointers are used.
 
 public class OptimalSearchRotateArray {
     public int Search(int[] nums, int target) {
@@ -67,3 +67,7 @@ public class OptimalSearchRotateArray {
     }
 }
 
+// Example usage
+// int[] nums = { 4, 5, 6, 7, 0, 1, 2 };
+// int target = 0;
+// int result = new OptimalSearchRotateArray().Search(nums, target); // Output: 4
