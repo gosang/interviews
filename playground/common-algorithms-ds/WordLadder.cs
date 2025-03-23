@@ -72,9 +72,10 @@ public class DivideConquerWordLadder {
 }
 
 
-// Optimal Solution
-// Explanation: Use BFS for shortest path.
-// Time Complexity: O(N * 26 * L), Space Complexity: O(N)
+// Optimal Solution (Use BFS for shortest path)
+// The optimal solution uses Breadth-First Search (BFS) to find the shortest transformation sequence, as BFS guarantees the minimum path length in an unweighted graph. We start with beginWord, enqueue it with level 1, and for each word, generate all one-letter transformations. If a transformation is in the word list and unvisited, we enqueue it with the next level. When we reach endWord, we return its level. This is efficient because it explores level by level, stopping at the shortest path.
+// Time Complexity: O(N * 26 * L) - N words, L length, 26 letters per position.
+// Space Complexity: O(N) - Queue and visited set store up to N words.
 
 public class OptimalWordLadder {
     public int LadderLength(string beginWord, string endWord, IList<string> wordList) {
@@ -106,3 +107,8 @@ public class OptimalWordLadder {
         return 0;
     }
 }
+
+// Example usage
+// string beginWord = "hit", endWord = "cog";
+// IList<string> wordList = new List<string> { "hot", "dot", "dog", "lot", "log", "cog" };
+// int result = new Solution().LadderLength(beginWord, endWord, wordList); // Output: 5
