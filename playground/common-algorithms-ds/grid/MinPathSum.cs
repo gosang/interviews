@@ -42,13 +42,13 @@ public class DivideConquerMinPathSum {
 }
 
 
-// Optimal Solution
-// Explanation: Use dynamic programming with a 2D array.
-// Time Complexity: O(m * n), Space Complexity: O(m * n)
-
+// Optimal Solution (Use dynamic programming with a 2D array)
+// The optimal solution uses dynamic programming with a 2D array dp, where dp[i,j] is the minimum path sum to (i,j). We initialize the first row and column by accumulating grid values, then fill the table: for each cell, add the grid value to the minimum of the cell above or to the left. This computes the minimum path efficiently by reusing previously calculated results.
+// Time Complexity: O(m * n) - Fill a 2D table of size m * n.
+// Space Complexity: O(m * n) - Size of the DP table.
 
 public class OptimalMinPathSum {
-    public int MinPathSum(int[][] grid) {
+     public int MinPathSum(int[][] grid) {
         int m = grid.Length, n = grid[0].Length;
         int[,] dp = new int[m, n];
         dp[0, 0] = grid[0][0];
@@ -64,3 +64,7 @@ public class OptimalMinPathSum {
         return dp[m - 1, n - 1];
     }
 }
+
+// Example usage
+// int[][] grid = { new int[] { 1, 3, 1 }, new int[] { 1, 5, 1 }, new int[] { 4, 2, 1 } };
+// int result = new OptimalMinPathSum().MinPathSum(grid); // Output: 7 (1->3->1->1->1)
