@@ -57,10 +57,10 @@ public class DivideConquerMaxSubarray {
 }
 
 
-// Optimal Solution
-// Explanation: Kadane’s algorithm for O(n) time.
-// Time Complexity: O(n), Space Complexity: O(1)
-
+// Optimal Solution (Kadane’s algorithm for O(n) time)
+// The optimal solution uses Kadane’s algorithm, which scans the array once and keeps track of the maximum sum ending at each position (maxEndingHere) and the overall maximum sum (maxSoFar). At each step, we decide whether to start a new subarray at the current element or extend the existing subarray by adding the current element, taking the maximum of these options. This avoids recomputing sums for all subarrays and solves the problem efficiently.
+// Time Complexity: O(n) - Single pass through the array.
+// Space Complexity: O(1) - Only two variables are used.
 
 public class OptimalMaxSubarray {
     public int MaxSubArray(int[] nums) {
@@ -72,3 +72,7 @@ public class OptimalMaxSubarray {
         return maxSoFar;
     }
 }
+
+// Example usage
+// int[] nums = { -2, 1, -3, 4, -1, 2, 1, -5, 4 };
+// int result = new OptimalMaxSubarray().MaxSubArray(nums); // Output: 6 ([4,-1,2,1])
