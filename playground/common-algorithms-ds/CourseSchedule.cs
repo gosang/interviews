@@ -45,7 +45,7 @@ public class BruteForceCoursesSchedule {
 
 
 // Divide-and-Conquer Solution
-// Explanation: Split the graph and check for cycles in each half and across. Inefficient due to graph traversal.
+// Split the graph and check for cycles in each half and across. Inefficient due to graph traversal.
 // Time Complexity: O(V + E log V), Space Complexity: O(V)
 
 
@@ -91,9 +91,10 @@ public class DivideConqueryCourseSchedule {
 }
 
 
-// Optimal Solution
-// Explanation: Use DFS with cycle detection.
-// Time Complexity: O(V + E), Space Complexity: O(V)
+// Optimal Solution (Use DFS with cycle detection)
+// The optimal solution uses Depth-First Search (DFS) to detect cycles in the directed graph. We build an adjacency list from the prerequisites, then perform DFS on each unvisited node. During DFS, we use two sets: visited to mark nodes we’ve fully explored and recStack to track nodes in the current recursion path. If we encounter a node already in recStack, there’s a cycle, and we return false. This efficiently checks for cycles in a single traversal.
+// Time Complexity: O(V + E) - Visit each vertex (V) and edge (E) once.
+// Space Complexity: O(V) - Space for the graph, visited set, and recursion stack.
 
 public class OptimalCourseSchedule {
     public bool CanFinish(int numCourses, int[][] prerequisites) {
@@ -111,8 +112,9 @@ public class OptimalCourseSchedule {
     }
     
     private bool Dfs(int node, List<List<int>> graph, HashSet<int> visited, HashSet<int> recStack) {
-        if (recStack.Contains(node)) return false;
+        if (recStack.Contains(node)) return false; // Cycle detected
         if (visited.Contains(node)) return true;
+        
         visited.Add(node);
         recStack.Add(node);
         foreach (int neighbor in graph[node]) {
@@ -122,3 +124,7 @@ public class OptimalCourseSchedule {
         return true;
     }
 }
+
+// Example usage
+// int[][] prerequisites = { new int[] { 1, 0 } };
+// bool result = new OptimalCourseSchedule().CanFinish(2, prerequisites); // Output: true
