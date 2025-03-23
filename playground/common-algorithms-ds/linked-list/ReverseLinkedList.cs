@@ -2,7 +2,6 @@
 
 // Brute Force Solution
 // The brute force approach collects all nodes into a list, then rebuilds the linked list in reverse order by updating the next pointers. We first traverse the list to store nodes, then iterate through the list backwards to set each node’s next pointer to the previous node. This is inefficient because it requires extra space and two passes over the list, though it’s conceptually simple.
-
 // Time Complexity: O(n) - Two passes: one to collect nodes, one to rebuild.
 // Space Complexity: O(n) - List stores all n nodes.
 
@@ -26,7 +25,7 @@ public class BruteForceReverseLinkedList{
 
 
 // Divide-and-Conquer Solution
-// Explanation: Split the list, reverse each half, and connect them. Less efficient due to list traversal.
+// Split the list, reverse each half, and connect them. Less efficient due to list traversal.
 // Time Complexity: O(n log n), Space Complexity: O(log n)
 
 
@@ -54,9 +53,11 @@ public class DivideConquerReverseLinkedList {
     }
 }
 
-// Optimal Solution
-// Explanation: Iterative reversal with three pointers.
-// Time Complexity: O(n), Space Complexity: O(1)
+// Optimal Solution (Iterative reversal with three pointers)
+
+// The optimal solution reverses the list in-place using three pointers: prev, current, and next. We iterate through the list once, reversing each node’s next pointer to point to the previous node. prev becomes the new head at the end. This is efficient because it uses constant space and only one pass, directly manipulating the links without storing nodes separately.
+// Time Complexity: O(n) - Single pass through the list.
+// Space Complexity: O(1) - Only three pointers, regardless of list size.
 
 public class OptimalReverseLinkedList {
     public ListNode ReverseList(ListNode head) {
@@ -70,3 +71,7 @@ public class OptimalReverseLinkedList {
         return prev;
     }
 }
+
+// Example usage
+// ListNode head = new ListNode(1, new ListNode(2, new ListNode(3)));
+// ListNode reversed = new OptimalReverseLinkedList().ReverseList(head); // Output: 3->2->1
