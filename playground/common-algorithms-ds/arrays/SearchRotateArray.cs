@@ -2,6 +2,21 @@
 // Problem: Search for a target in a rotated sorted array.
 
 
+// Brute Force Solution
+// The brute force approach performs a linear search through the array, checking each element until the target is found or the end is reached. This ignores the rotated sorted property, making it inefficient despite its simplicity.
+// Time Complexity: O(n) - Single pass through the array.
+// Space Complexity: O(1) - No extra space.
+
+public class BruteForceSearchRotateArray {
+     public int SearchBruteForce(int[] nums, int target) {
+        for (int i = 0; i < nums.Length; i++) {
+            if (nums[i] == target) return i;
+        }
+        return -1;
+    }
+}
+
+
 // Divide-and-Conquer Solution
 // Explanation: Use binary search with rotation handling.
 // Time Complexity: O(log n), Space Complexity: O(log n)
