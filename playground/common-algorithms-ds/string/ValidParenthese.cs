@@ -55,9 +55,10 @@ public class DivideConquerValidParenthense {
 }
 
 
-// Optimal Solution
-// Explanation: Use a stack for O(n) time.
-// Time Complexity: O(n), Space Complexity: O(n)
+// Optimal Solution (Use a stack for O(n) time)
+// The optimal solution uses a stack to track opening brackets. We iterate through the string once: for each opening bracket ((, {, [) we push it onto the stack; for each closing bracket (), }, ]), we check if the stack is empty (no match) or if the top of the stack matches the closing bracket. If all brackets match and the stack is empty at the end, the string is valid. This is efficient because it requires only one pass and uses a stack for constant-time operations.
+// Time Complexity: O(n) - Single pass through the string.
+// Space Complexity: O(n) - Stack can store up to n characters in the worst case.
 
 public class OptimalValidParenthese {
     public bool IsValid(string s) {
@@ -65,9 +66,18 @@ public class OptimalValidParenthese {
         Dictionary<char, char> pairs = new Dictionary<char, char> { { ')', '(' }, { '}', '{' }, { ']', '[' } };
         
         foreach (char c in s) {
-            if (pairs.ContainsValue(c)) stack.Push(c);
-            else if (pairs.ContainsKey(c) && (stack.Count == 0 || stack.Pop() != pairs[c])) return false;
+            if (pairs.ContainsValue(c)) {
+                stack.Push(c);
+            } else if (pairs.ContainsKey(c)) {
+                if (stack.Count == 0 || stack.Pop() != pairs[c]) {
+                    return false;
+                }
+            }
         }
         return stack.Count == 0;
     }
 }
+
+// Example usage
+// string s = "({[]})";
+// bool result = new OptimalValidParenthese().IsValid(s); // Output: true
