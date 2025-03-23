@@ -1,5 +1,48 @@
 // Course Schedule
-// Problem: Determine if you can finish all courses given prerequisites (no cycles).
+// Problem: Given numCourses and prerequisites [ai, bi] (ai depends on bi), determine if you can finish all courses (no cycles).
+
+// Brute Force Solution
+// The brute force approach generates all possible orderings of courses (permutations) and checks if each satisfies the prerequisites. We build an adjacency list representation of the graph, then use backtracking to try every permutation, ensuring that for each course added, all its prerequisites are already in the order. If any valid order exists, there’s no cycle. This is extremely inefficient due to the factorial number of permutations.
+// Time Complexity: O(n!) - Generating and checking all permutations of n courses.
+// Space Complexity: O(n) - Store the graph and current order.
+
+public class BruteForceCoursesSchedule {
+     public bool CanFinishBruteForce(int numCourses, int[][] prerequisites) {
+        var graph = new List<List<int>>(numCourses);
+        for (int i = 0; i < numCourses; i++) graph.Add(new List<int>());
+        foreach (var prereq in prerequisites) graph[prereq[1]].Add(prereq[0]);
+        
+        List<int> order = new List<int>();
+        HashSet<int> visited = new HashSet<int>();
+        return GenerateOrders(graph, numCourses, order, visited);
+    }
+    
+    private bool GenerateOrders(List<List<int>> graph, int n, List<int> order, HashSet<int> visited) {
+        if (order.Count == n) return true;
+        
+        for (int i = 0; i < n; i++) {
+            if (!visited.Contains(i)) {
+                bool canAdd = true;
+                foreach (int pre in graph[i]) {
+                    if (!order.Contains(pre)) {
+                        canAdd = false;
+                        break;
+                    }
+                }
+                if (canAdd) {
+                    visited.Add(i);
+                    order.Add(i);
+                    if (GenerateOrders(graph, n, order, visited)) return true;
+                    order.RemoveAt(order.Count - 1);
+                    visited.Remove(i);
+                }
+            }
+        }
+        return false;
+    }
+}
+
+
 
 // Divide-and-Conquer Solution
 // Explanation: Split the graph and check for cycles in each half and across. Inefficient due to graph traversal.
