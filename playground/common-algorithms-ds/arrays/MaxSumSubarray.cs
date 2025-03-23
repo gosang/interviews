@@ -1,5 +1,26 @@
 // Maximum Subarray
-// Problem: Find the maximum sum of a contiguous subarray.
+// Problem: Given an integer array nums, find the contiguous subarray with the largest sum.
+
+// Brute Force Solution
+// The brute force approach computes the sum of every possible subarray by using two nested loops to define start and end indices. For each subarray, we calculate its sum and update the maximum sum if it’s larger. This is inefficient because it checks all O(n²) subarrays, even though many could be skipped with a smarter approach.
+// Time Complexity: O(n²) - O(n) start points, O(n) end points per start.
+// Space Complexity: O(1) - Only stores the maximum sum.
+
+public class BruteForceMaxSubarray{
+    public int MaxSubArrayBruteForce(int[] nums) {
+        int maxSum = nums[0];
+        for (int i = 0; i < nums.Length; i++) {
+            int sum = 0;
+            for (int j = i; j < nums.Length; j++) {
+                sum += nums[j];
+                maxSum = Math.Max(maxSum, sum);
+            }
+        }
+        return maxSum;
+    }
+}
+
+
 // Divide-and-Conquer Solution
 // Explanation: Split the array, compute max subarray in left, right, and across the middle.
 // Time Complexity: O(n log n), Space Complexity: O(log n)
