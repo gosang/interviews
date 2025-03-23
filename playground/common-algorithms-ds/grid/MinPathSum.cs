@@ -1,5 +1,26 @@
 //  Minimum Path Sum
-// Problem: Find the minimum path sum from top-left to bottom-right in a grid.
+// Problem: Find the minimum path sum from top-left to bottom-right in a grid (right/down moves only).
+
+// Brute Force Solution
+// The brute force approach recursively explores all possible paths from (0,0) to (m-1,n-1) by moving right or down. At each cell, we compute the minimum path sum by adding the current cell’s value to the minimum of the recursive calls for the down and right paths. This is inefficient because it recomputes overlapping subproblems exponentially, with no memoization.
+// Time Complexity: O(2^(m+n)) - Each cell branches into two paths, leading to exponential growth.
+// Space Complexity: O(m + n) - Recursion stack depth.
+
+public class BruteForceMinPathSum {
+    public int MinPathSumBruteForce(int[][] grid) {
+        return MinPathHelper(grid, 0, 0);
+    }
+    
+    private int MinPathHelper(int[][] grid, int i, int j) {
+        if (i == grid.Length - 1 && j == grid[0].Length - 1) return grid[i][j];
+        if (i >= grid.Length || j >= grid[0].Length) return int.MaxValue;
+        
+        int down = MinPathHelper(grid, i + 1, j);
+        int right = MinPathHelper(grid, i, j + 1);
+        return grid[i][j] + Math.Min(down, right);
+    }
+}
+
 
 // Divide-and-Conquer Solution
 // Explanation: Recursively compute min path by exploring all possibilities.
