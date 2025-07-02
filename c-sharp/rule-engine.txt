@@ -1,0 +1,149 @@
+namespace BusinessRuleEngine
+{
+    public class UserContext : IUserContext
+    {
+        public IEnumerable<string> Roles { get; }
+        public string GroupId { get; }
+
+        public UserContext(IEnumerable<string> roles, string groupId)
+        {
+            Roles = roles ?? throw new ArgumentNullException(nameof(roles));
+            GroupId = groupId ?? throw new ArgumentNullException(nameof(groupId));
+        }
+    }
+
+    public class Record : IRecord
+    {
+        public string RecordId { get; }
+        public string GroupId { get; }
+        public string RecordType { get; }
+
+        public Record(string recordId, string groupId, string recordType)
+        {
+            RecordId = recordId ?? throw new ArgumentNullException(nameof(recordId));
+            GroupId = groupId ?? throw new ArgumentNullException(nameof(groupId));
+            RecordType = recordType ?? throw new ArgumentNullException(nameof(recordType));
+        }
+    }
+
+    public interface IVisibilityRule
+    {
+        string RuleName { get; }
+        bool Evaluate(UserContext userContext, Record record);
+    }
+
+    // Interface for user context
+    public interface IUserContext
+    {
+        IEnumerable<string> Roles { get; }
+        string GroupId { get; }
+    }
+
+    // Interface for records
+    public interface IRecord
+    {
+        string RecordId { get; }
+        string GroupId { get; }
+        string RecordType { get; } // e.g., Profile, Account, Mortgage
+    }
+
+    /// <summary>
+    /// Rule Engine
+    /// </summary>
+    public class VisibilityRuleEngine
+    {
+        private readonly IEnumerable<IVisibilityRule> _rules;
+
+        public VisibilityRuleEngine(IEnumerable<IVisibilityRule> rules)
+        {
+            _rules = rules ?? throw new ArgumentNullException(nameof(rules));
+        }
+
+        public bool IsRecordVisible(UserContext userContext, Record record)
+        {
+            // Evaluate all rules; a record is visible if any rule passes
+            return _rules.Any(rule => rule.Evaluate(userContext, record));
+        }
+
+        public bool IsRecordVisible(UserContext userContext, Record record, string ruleName)
+        {
+            // Evaluate a specific rule
+            var rule = _rules.FirstOrDefault(r => r.RuleName == ruleName) ?? throw new InvalidOperationException($"Rule '{ruleName}' not found.");
+
+            return rule.Evaluate(userContext, record);
+        }
+    }
+
+    /// <summary>
+    /// IsVisibleToAccountRule
+    /// </summary>
+    public class IsVisibleToAccountRule : IVisibilityRule
+    {
+        public string RuleName => "IsVisibleToAccount";
+
+        public bool Evaluate(UserContext userContext, Record record)
+        {
+            // Rule: Visible if user has "Account" role and belongs to the same group
+            return userContext.Roles.Contains("Account") &&
+                   userContext.GroupId == record.GroupId &&
+                   record.RecordType == "Account";
+        }
+    }
+
+    /// <summary>
+    /// IsVisibleToMortgageRule
+    /// </summary>
+    public class IsVisibleToMortgageRule : IVisibilityRule
+    {
+        public string RuleName => "IsVisibleToMortgage";
+
+        public bool Evaluate(UserContext userContext, Record record)
+        {
+            // Rule: Visible if user has "Mortgage" role and belongs to the same group
+            return userContext.Roles.Contains("Mortgage") &&
+                   userContext.GroupId == record.GroupId &&
+                   record.RecordType == "Mortgage";
+        }
+    }
+
+    /// <summary>
+    /// IsVisibleToProfileRule
+    /// </summary>
+    public class IsVisibleToProfileRule : IVisibilityRule
+    {
+        public string RuleName => "IsVisibleToProfile";
+
+        public bool Evaluate(UserContext userContext, Record record)
+        {
+            // Rule: Visible if user has "Profile" role and belongs to the same group as the record
+            return userContext.Roles.Contains("Profile") &&
+                   userContext.GroupId == record.GroupId &&
+                   record.RecordType == "Profile";
+        }
+    }
+}
+
+////
+// Setup DI
+var services = new ServiceCollection();
+services.AddVisibilityRules();
+
+var provider = services.BuildServiceProvider();
+
+// Resolve rule engine
+var ruleEngine = provider.GetRequiredService<VisibilityRuleEngine>();
+
+// Create user context and record
+var userContext = new UserContext(new[] { "Profile", "Account" }, "Group1");
+var record = new Record("Record1", "Group1", "Profile");
+
+// Check visibility for all rules
+bool isVisible = ruleEngine.IsRecordVisible(userContext, record);
+Console.WriteLine($"Is record visible? {isVisible}"); // True (Profile rule passes)
+
+// Check specific rule
+bool isVisibleToProfile = ruleEngine.IsRecordVisible(userContext, record, "IsVisibleToProfile");
+Console.WriteLine($"Is visible to Profile? {isVisibleToProfile}"); // True
+
+bool isVisibleToMortgage = ruleEngine.IsRecordVisible(userContext, record, "IsVisibleToMortgage");
+Console.WriteLine($"Is visible to Mortgage? {isVisibleToMortgage}"); // False
