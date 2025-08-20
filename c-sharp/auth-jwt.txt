@@ -1,0 +1,565 @@
+To implement a robust, multi-site Single Sign-On (SSO) system using the OAuth 2.0 Authorization Code Flow with PKCE, we’ll design the Centralized Auth Site as both an OAuth 2.0 Authorization Server and an OpenID Connect (OIDC) Provider, leveraging the ForgeRock JavaScript SDK to authenticate users against ForgeRock as the upstream Identity Provider (IdP). The Customer Portal and Request Document sites will act as OAuth clients, redirecting users to the Centralized Auth Site for authentication and exchanging authorization codes for tokens. The system will support SSO, allowing users to access all sites without re-authenticating if they have an active session with the Centralized Auth Site.Below, I provide a detailed implementation with TypeScript code for Next.js, focusing on security, scalability, and SSO behavior. Since we’re avoiding the MongoDBAdapter (per the previous request), we’ll use JWT-based sessions stored in secure cookies to manage SSO across sites, with the Centralized Auth Site maintaining session state.Overview of the SSO FlowUser Access:A user attempts to access a protected route on the Customer Portal or Request Document site.
+If unauthenticated, the site redirects the user to the Centralized Auth Site with OAuth parameters (client ID, redirect URI, code challenge, etc.).
+
+Centralized Auth Site:Checks for an existing session (via a JWT cookie).
+If no session exists, uses the ForgeRock JavaScript SDK to authenticate the user against ForgeRock’s OAuth 2.0 endpoints.
+If the user is already authenticated (SSO), skips re-authentication.
+Generates an authorization code and redirects back to the requesting site’s redirect URI with the code.
+
+Token Exchange:The requesting site (Customer Portal or Request Document) exchanges the authorization code (with PKCE code verifier) for an ID token, access token, and refresh token via the Centralized Auth Site’s token endpoint.
+The site stores the tokens in a secure JWT cookie for session management.
+
+SSO Behavior:If the user has an active session (JWT cookie) with the Centralized Auth Site, they are not prompted to re-authenticate when accessing another site.
+The Centralized Auth Site issues a new authorization code immediately, enabling seamless access across sites.
+
+Session Management:Sessions are stored as signed JWTs in secure, HTTP-only cookies with a shared domain (.example.com).
+The JWT contains user info, tokens, and expiration, validated by all sites.
+
+PrerequisitesForgeRock Configuration:OAuth 2.0 client in ForgeRock with:Client ID and Client Secret.
+Redirect URI: https://auth.example.com/callback (for ForgeRock callback).
+Grant Type: Authorization Code with PKCE.
+Scopes: openid profile email.
+
+Endpoints:Authorization: https://<forgerock-domain>/am/oauth2/authorize.
+Token: https://<forgerock-domain>/am/oauth2/access_token.
+Userinfo: https://<forgerock-domain>/am/oauth2/userinfo.
+
+Centralized Auth Site Configuration:Acts as an OAuth 2.0 Authorization Server with its own client configurations for the Customer Portal and Request Document sites.
+Client IDs and secrets for each site (stored securely in the Centralized Auth Site).
+Endpoints:Authorization: https://auth.example.com/api/auth/authorize.
+Token: https://auth.example.com/api/auth/token.
+
+Dependencies:Install in all projects:bash
+
+npm install @forgerock/javascript-sdk next-auth jose nookies
+
+Environment Variables:Centralized Auth Site (.env.local):env
+
+FORGEROCK_CLIENT_ID=<forgerock-client-id>
+FORGEROCK_CLIENT_SECRET=<forgerock-client-secret>
+FORGEROCK_AUTH_URL=https://<forgerock-domain>/am/oauth2/authorize
+FORGEROCK_TOKEN_URL=https://<forgerock-domain>/am/oauth2/access_token
+FORGEROCK_USERINFO_URL=https://<forgerock-domain>/am/oauth2/userinfo
+JWT_SECRET=<random-secret-for-jwt-signing>
+NEXTAUTH_URL=https://auth.example.com
+CLIENT_PORTAL_ID=<portal-client-id>
+CLIENT_PORTAL_SECRET=<portal-client-secret>
+CLIENT_REQUEST_ID=<request-client-id>
+CLIENT_REQUEST_SECRET=<request-client-secret>
+
+Customer Portal (.env.local):env
+
+NEXTAUTH_URL=https://portal.example.com
+JWT_SECRET=<same-jwt-secret-as-auth-site>
+OAUTH_CLIENT_ID=<portal-client-id>
+OAUTH_CLIENT_SECRET=<portal-client-secret>
+OAUTH_AUTH_URL=https://auth.example.com/api/auth/authorize
+OAUTH_TOKEN_URL=https://auth.example.com/api/auth/token
+
+Request Document Site (.env.local):env
+
+NEXTAUTH_URL=https://request.example.com
+JWT_SECRET=<same-jwt-secret-as-auth-site>
+OAUTH_CLIENT_ID=<request-client-id>
+OAUTH_CLIENT_SECRET=<request-client-secret>
+OAUTH_AUTH_URL=https://auth.example.com/api/auth/authorize
+OAUTH_TOKEN_URL=https://auth.example.com/api/auth/token
+
+Domains:Centralized Auth Site: https://auth.example.com
+Customer Portal: https://portal.example.com
+Request Document Site: https://request.example.com
+Shared domain: .example.com for cookie sharing.
+
+Centralized Auth Site ImplementationThe Centralized Auth Site acts as both an OAuth 2.0 Authorization Server and a client to ForgeRock.1. Configure the ForgeRock SDKCreate lib/forgerock.ts:typescript
+
+import { Config, OAuth2Client } from "@forgerock/javascript-sdk";
+
+Config.set({
+  clientId: process.env.FORGEROCK_CLIENT_ID,
+  redirectUri: "https://auth.example.com/callback",
+  scope: "openid profile email",
+  serverConfig: {
+    baseUrl: "https://<forgerock-domain>/am/",
+    timeout: 30000,
+  },
+  tokenStore: "sessionStorage",
+});
+
+export const oauthClient = new OAuth2Client();
+
+2. JWT UtilityCreate lib/jwt.ts:typescript
+
+import * as jose from "jose";
+
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
+
+export async function createJWT(payload: object, expiresIn: string = "30d") {
+  return new jose.SignJWT(payload)
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime(expiresIn)
+    .sign(JWT_SECRET);
+}
+
+export async function verifyJWT(token: string) {
+  try {
+    const { payload } = await jose.jwtVerify(token, JWT_SECRET);
+    return payload;
+  } catch (error) {
+    throw new Error("Invalid JWT");
+  }
+}
+
+3. Client RegistryCreate lib/clients.ts to store client configurations:typescript
+
+export const clients = {
+  [process.env.CLIENT_PORTAL_ID!]: {
+    secret: process.env.CLIENT_PORTAL_SECRET!,
+    redirectUri: "https://portal.example.com/api/auth/callback",
+  },
+  [process.env.CLIENT_REQUEST_ID!]: {
+    secret: process.env.CLIENT_REQUEST_SECRET!,
+    redirectUri: "https://request.example.com/api/auth/callback",
+  },
+};
+
+Explanation:Stores client IDs, secrets, and redirect URIs for the Customer Portal and Request Document sites.
+Used to validate client credentials during authorization and token exchange.
+
+4. Authorization EndpointCreate pages/api/auth/authorize.ts:typescript
+
+import type { NextApiRequest, NextApiResponse } from "next";
+import { oauthClient } from "@/lib/forgerock";
+import { verifyJWT } from "@/lib/jwt";
+import { parseCookies } from "nookies";
+import { randomBytes } from "crypto";
+import { clients } from "@/lib/clients";
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const { client_id, redirect_uri, state, code_challenge, code_challenge_method } = req.query;
+
+  // Validate client and redirect URI
+  const client = clients[client_id as string];
+  if (!client || client.redirectUri !== redirect_uri) {
+    return res.status(400).json({ error: "Invalid client or redirect URI" });
+  }
+
+  if (code_challenge_method !== "S256") {
+    return res.status(400).json({ error: "Invalid code_challenge_method" });
+  }
+
+  // Check for existing session
+  const cookies = parseCookies({ req });
+  const sessionJwt = cookies.auth_session;
+
+  if (sessionJwt) {
+    try {
+      await verifyJWT(sessionJwt);
+      // Session exists, generate authorization code
+      const code = randomBytes(32).toString("hex");
+      // Store code temporarily (in-memory or Redis for production)
+      // For simplicity, assume in-memory storage with expiration
+      const codeStore: { [key: string]: { clientId: string; codeChallenge: string } } = {};
+      codeStore[code] = { clientId: client_id as string, codeChallenge: code_challenge as string };
+
+      setTimeout(() => delete codeStore[code], 10 * 60 * 1000); // Expire in 10 minutes
+
+      // Redirect back to client with code
+      const redirectUrl = new URL(redirect_uri as string);
+      redirectUrl.searchParams.set("code", code);
+      redirectUrl.searchParams.set("state", state as string);
+      return res.redirect(redirectUrl.toString());
+    } catch (error) {
+      // Invalid session, proceed to authenticate
+    }
+  }
+
+  // No session, redirect to ForgeRock
+  try {
+    const authUrl = await oauthClient.getAuthorizeUrl({
+      state: JSON.stringify({ client_id, redirect_uri, state, code_challenge }),
+    });
+    res.redirect(authUrl);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to initiate authentication" });
+  }
+}
+
+Explanation:Validates the client ID and redirect URI.
+Checks for an existing session via the auth_session JWT cookie.
+If a valid session exists, generates an authorization code and redirects back to the client.
+If no session, redirects to ForgeRock for authentication, passing client parameters in the state.
+
+5. ForgeRock CallbackCreate pages/callback.tsx:typescript
+
+import { useEffect } from "react";
+import { useRouter } from "next/router";
+import { oauthClient } from "@/lib/forgerock";
+import { createJWT } from "@/lib/jwt";
+import { setCookie } from "nookies";
+import { clients } from "@/lib/clients";
+
+export default function CallbackPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const handleCallback = async () => {
+      try {
+        // Exchange code for tokens
+        const tokens = await oauthClient.getTokens({
+          query: router.query as Record<string, string>,
+        });
+
+        // Fetch user info
+        const userInfo = await oauthClient.getUserInfo(tokens.accessToken);
+
+        // Create JWT session
+        const payload = {
+          id: userInfo.sub,
+          name: userInfo.name,
+          email: userInfo.email,
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+          expires: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60,
+        };
+        const jwt = await createJWT(payload);
+
+        // Set session cookie
+        setCookie(null, "auth_session", jwt, {
+          maxAge: 30 * 24 * 60 * 60,
+          path: "/",
+          secure: true,
+          httpOnly: true,
+          domain: ".example.com",
+          sameSite: "lax",
+        });
+
+        // Parse state to get original client parameters
+        const state = JSON.parse(router.query.state as string);
+        const { client_id, redirect_uri, state: originalState, code_challenge } = state;
+
+        // Validate client
+        const client = clients[client_id];
+        if (!client || client.redirectUri !== redirect_uri) {
+          throw new Error("Invalid client");
+        }
+
+        // Generate authorization code
+        const code = crypto.randomBytes(32).toString("hex");
+        const codeStore: { [key: string]: { clientId: string; codeChallenge: string; tokens: any } } = {};
+        codeStore[code] = { clientId: client_id, codeChallenge: code_challenge, tokens };
+
+        setTimeout(() => delete codeStore[code], 10 * 60 * 1000); // Expire in 10 minutes
+
+        // Redirect to client
+        const redirectUrl = new URL(redirect_uri);
+        redirectUrl.searchParams.set("code", code);
+        redirectUrl.searchParams.set("state", originalState);
+        router.push(redirectUrl.toString());
+      } catch (error) {
+        console.error("Callback error:", error);
+        router.push("/?error=Authentication failed");
+      }
+    };
+
+    if (router.query.code) {
+      handleCallback();
+    }
+  }, [router]);
+
+  return <div>Processing login...</div>;
+}
+
+Explanation:Exchanges the ForgeRock authorization code for tokens.
+Creates a JWT session cookie with user info and tokens.
+Generates an authorization code for the client and redirects back with the code.
+
+6. Token EndpointCreate pages/api/auth/token.ts:typescript
+
+import type { NextApiRequest, NextApiResponse } from "next";
+import { clients } from "@/lib/clients";
+import { createJWT } from "@/lib/jwt";
+import { setCookie } from "nookies";
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const { grant_type, code, client_id, client_secret, code_verifier, redirect_uri } = req.body;
+
+  if (grant_type !== "authorization_code") {
+    return res.status(400).json({ error: "Unsupported grant_type" });
+  }
+
+  // Validate client
+  const client = clients[client_id];
+  if (!client || client.secret !== client_secret || client.redirectUri !== redirect_uri) {
+    return res.status(401).json({ error: "Invalid client credentials" });
+  }
+
+  // Validate code (in-memory store for simplicity)
+  const codeStore: { [key: string]: { clientId: string; codeChallenge: string; tokens: any } } = {};
+  const storedCode = codeStore[code];
+
+  if (!storedCode || storedCode.clientId !== client_id) {
+    return res.status(400).json({ error: "Invalid code" });
+  }
+
+  // Verify PKCE
+  const { createHash } = await import("crypto");
+  const computedChallenge = createHash("sha256").update(code_verifier).digest("base64url");
+  if (computedChallenge !== storedCode.codeChallenge) {
+    return res.status araya(400).json({ error: "Invalid code_verifier" });
+  }
+
+  // Return tokens
+  const tokens = storedCode.tokens;
+  const response = {
+    access_token: tokens.accessToken,
+    id_token: await createJWT({
+      sub: tokens.id,
+      name: tokens.name,
+      email: tokens.email,
+      aud: client_id,
+      iss: "https://auth.example.com",
+      exp: Math.floor(Date.now() / 1000) + 3600,
+    }),
+    refresh_token: tokens.refreshToken,
+    token_type: "Bearer",
+    expires_in: 3600,
+  };
+
+  // Clean up code
+  delete codeStore[code];
+
+  // Set session cookie for client
+  setCookie({ res }, "auth_session", await createJWT(tokens), {
+    maxAge: 30 * 24 * 60 * 60,
+    path: "/",
+    secure: true,
+    httpOnly: true,
+    domain: ".example.com",
+    sameSite: "lax",
+  });
+
+  res.status(200).json(response);
+}
+
+Explanation:Validates the client credentials and authorization code.
+Verifies the PKCE code verifier.
+Returns the tokens from the ForgeRock authentication, including a new ID token as a JWT.
+Sets the auth_session cookie for the client site.
+
+7. Login PageCreate pages/index.tsx:typescript
+
+import { useState } from "react";
+import { oauthClient } from "@/lib/forgerock";
+
+export default function LoginPage() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
+      const authUrl = await oauthClient.getAuthorizeUrl();
+      window.location.href = authUrl;
+    } catch (err) {
+      setError("Failed to initiate login");
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <h1>Centralized Auth Site</h1>
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      <button onClick={handleLogin} disabled={loading}>
+        {loading ? "Loading..." : "Sign in with ForgeRock"}
+      </button>
+    </div>
+  );
+}
+
+Customer Portal Site ImplementationThe Customer Portal acts as an OAuth client, redirecting to the Centralized Auth Site and exchanging codes for tokens.1. Configure NextAuth.jsCreate pages/api/auth/[...nextauth].ts:typescript
+
+import NextAuth, { AuthOptions } from "next-auth";
+import { OAuthConfig } from "next-auth/providers";
+import { createJWT, verifyJWT } from "@/lib/jwt";
+
+const oauthProvider: OAuthConfig<any> = {
+  id: "auth-site",
+  name: "Centralized Auth",
+  type: "oauth",
+  authorization: {
+    url: process.env.OAUTH_AUTH_URL,
+    params: { scope: "openid profile email" },
+  },
+  token: process.env.OAUTH_TOKEN_URL,
+  userinfo: "https://auth.example.com/api/auth/userinfo", // Optional, if needed
+  clientId: process.env.OAUTH_CLIENT_ID,
+  clientSecret: process.env.OAUTH_CLIENT_SECRET,
+  checks: ["pkce"],
+  profile(profile) {
+    return {
+      id: profile.sub,
+      name: profile.name,
+      email: profile.email,
+    };
+  },
+};
+
+export const authOptions: AuthOptions = {
+  providers: [oauthProvider],
+  secret: process.env.JWT_SECRET,
+  session: {
+    strategy: "jwt",
+  },
+  callbacks: {
+    async jwt({ token, user, account }) {
+      if (user && account) {
+        token.id = user.id;
+        token.accessToken = account.access_token;
+        token.refreshToken = account.refresh_token;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token.id) {
+        session.user.id = token.id;
+        session.accessToken = token.accessToken;
+        session.refreshToken = token.refreshToken;
+      }
+      return session;
+    },
+  },
+};
+
+export default NextAuth(authOptions);
+
+2. Protect Routes with MiddlewareCreate middleware.ts:typescript
+
+import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
+
+export default withAuth({
+  callbacks: {
+    authorized: ({ token }) => !!token,
+  },
+  pages: {
+    signIn: "/api/auth/signin",
+  },
+});
+
+export const config = {
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+};
+
+3. Create a Protected Home PageCreate pages/index.tsx:typescript
+
+import { signOut, useSession } from "next-auth/react";
+import Link from "next/link";
+
+export default function Home() {
+  const { data: session } = useSession();
+
+  if (!session) {
+    return <div>Please sign in at <a href="https://auth.example.com">Auth Site</a></div>;
+  }
+
+  return (
+    <div>
+      <h1>Customer Portal</h1>
+      <p>Welcome, {session.user?.name}</p>
+      <Link href="https://request.example.com">
+        Go to Request Document
+      </Link>
+      <button onClick={() => signOut({ callbackUrl: "https://auth.example.com" })}>
+        Sign Out
+      </button>
+    </div>
+  );
+}
+
+4. Wrap the App with SessionProviderUpdate pages/_app.tsx:typescript
+
+import { SessionProvider } from "next-auth/react";
+import type { AppProps } from "next/app";
+
+export default function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
+  return (
+    <SessionProvider session={session}>
+      <Component {...pageProps} />
+    </SessionProvider>
+  );
+}
+
+Request Document Site ImplementationThe Request Document Site is identical to the Customer Portal.1. Configure NextAuth.jsUse the same pages/api/auth/[...nextauth].ts as the Customer Portal, updating NEXTAUTH_URL and OAUTH_CLIENT_ID/SECRET in .env.local.2. Protect Routes with MiddlewareUse the same middleware.ts.3. Create a Document Request PageCreate pages/index.tsx:typescript
+
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import { useState } from "react";
+
+export default function RequestDocument() {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const [completed, setCompleted] = useState(false);
+
+  if (!session) {
+    return <div>Please sign in at <a href="https://auth.example.com">Auth Site</a></div>;
+  }
+
+  const handleComplete = () => {
+    setCompleted(true);
+    router.push("https://portal.example.com");
+  };
+
+  return (
+    <div>
+      <h1>Request Document</h1>
+      <p>User: {session.user?.name}</p>
+      <button onClick={handleComplete} disabled={completed}>
+        {completed ? "Request Completed" : "Complete Request"}
+      </button>
+    </div>
+  );
+}
+
+4. Wrap the App with SessionProviderUpdate pages/_app.tsx (same as above).SSO BehaviorSession Persistence: The auth_session JWT cookie is shared across all sites via the .example.com domain.
+SSO Check: The /api/auth/authorize endpoint checks for an existing session. If valid, it issues an authorization code without requiring ForgeRock re-authentication.
+Token Refresh: The refresh token can be used to obtain new access tokens (not implemented here for brevity but can be added to the token endpoint).
+
+Security ConsiderationsHTTPS: Mandatory for all sites to secure cookies and API calls.
+Secure Cookies: HTTP-only, secure, SameSite: lax, and domain-scoped (.example.com).
+JWT Security: Signed with HS256 and a strong JWT_SECRET.
+PKCE: Enforced by both the ForgeRock SDK and the Centralized Auth Site’s OAuth flow.
+Code Storage: In-memory storage is used for simplicity; use Redis or a similar store for production to handle authorization codes securely.
+CORS: Configure ForgeRock and the Centralized Auth Site to allow requests from client domains.
+Token Validation: The token endpoint verifies client credentials and PKCE.
+
+Testing the FlowStart all three Next.js apps:bash
+
+npm run dev
+
+Access https://portal.example.com.
+Get redirected to https://auth.example.com/api/auth/authorize.
+If no session, authenticate with ForgeRock; if a session exists, get an authorization code immediately.
+Return to https://portal.example.com/api/auth/callback and exchange the code for tokens.
+Access https://request.example.com without re-authentication.
+Complete a request and return to the Customer Portal.
+
+TroubleshootingCookie Issues: Verify the .example.com domain and cookie attributes.
+JWT Validation: Ensure JWT_SECRET is identical across sites.
+Redirect Errors: Check redirect URIs in ForgeRock and clients.ts.
+Code Storage: For production, replace in-memory codeStore with Redis.
+SSO Failure: Confirm the auth_session cookie is set and validated correctly.
+
+ReferencesForgeRock JavaScript SDK: ForgeRock Documentation
+NextAuth.js OAuth Provider: NextAuth.js Documentation
+JOSE Library: JOSE Documentation
+OAuth 2.0: RFC 6749
+PKCE: RFC 7636
+
+This implementation provides a secure, scalable SSO system using the OAuth 2.0 Authorization Code Flow with PKCE, leveraging the ForgeRock JavaScript SDK and JWT-based sessions for multi-site authentication without a database. Let me know if you need further enhancements, such as token refresh or additional endpoints!
+
