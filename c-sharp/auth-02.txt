@@ -1,0 +1,404 @@
+To implement a robust, multi-site Single Sign-On (SSO) system using the OAuth 2.0 Authorization Code Flow with PKCE, without relying on JWT validation or code storage (e.g., in-memory or Redis), we’ll design the Centralized Auth Site as an OAuth 2.0 Authorization Server and OpenID Connect (OIDC) Provider. It will use the ForgeRock JavaScript SDK to authenticate users against ForgeRock as the upstream Identity Provider (IdP). The Customer Portal and Request Document sites will act as OAuth clients, redirecting users to the Centralized Auth Site for authentication and directly exchanging authorization codes for tokens (ID Token, Access Token, Refresh Token) with ForgeRock, bypassing the need for additional session storage or JWT validation. This approach simplifies the architecture while maintaining security and SSO behavior.Key Changes from Previous ImplementationNo JWT Validation: The Centralized Auth Site does not create or validate JWTs for session management. Instead, it relies on ForgeRock’s session management and token issuance.
+No Code Storage: The Centralized Auth Site acts as a pass-through, forwarding the authorization code from ForgeRock directly to the client site, which exchanges it with ForgeRock’s token endpoint.
+SSO Behavior: ForgeRock maintains the user’s session. If the user is already authenticated, ForgeRock issues a new authorization code without prompting for login, enabling SSO across sites.
+Token Exchange: Each client site (Customer Portal, Request Document) exchanges the authorization code directly with ForgeRock’s token endpoint, using PKCE for security.
+
+FlowUser Access:A user attempts to access a protected route on the Customer Portal or Request Document site.
+If unauthenticated, the site redirects to the Centralized Auth Site with OAuth parameters (client ID, redirect URI, code challenge, etc.).
+
+Centralized Auth Site:Redirects the user to ForgeRock’s authorization endpoint using the ForgeRock JavaScript SDK.
+If the user has an active ForgeRock session (SSO), no login prompt is shown.
+ForgeRock redirects back to the Centralized Auth Site’s callback with an authorization code.
+The Centralized Auth Site forwards the code to the client’s redirect URI.
+
+Token Exchange:The client site exchanges the authorization code (with PKCE code verifier) directly with ForgeRock’s token endpoint to obtain ID Token, Access Token, and Refresh Token.
+Tokens are stored in secure, HTTP-only cookies for session management.
+
+SSO Behavior:ForgeRock’s session management ensures that users with an active session are not prompted to re-authenticate when accessing another site.
+Each site independently verifies tokens with ForgeRock’s userinfo endpoint or introspection endpoint (if needed).
+
+PrerequisitesForgeRock Configuration:OAuth 2.0 clients for each site (Centralized Auth, Customer Portal, Request Document) with:Client ID and Client Secret (optional for public clients with PKCE).
+Redirect URIs:Centralized Auth: https://auth.example.com/callback.
+Customer Portal: https://portal.example.com/api/auth/callback.
+Request Document: https://request.example.com/api/auth/callback.
+
+Grant Type: Authorization Code with PKCE.
+Scopes: openid profile email.
+
+Endpoints:Authorization: https://<forgerock-domain>/am/oauth2/authorize.
+Token: https://<forgerock-domain>/am/oauth2/access_token.
+Userinfo: https://<forgerock-domain>/am/oauth2/userinfo.
+
+Dependencies:Install in all projects:bash
+
+npm install @forgerock/javascript-sdk next-auth nookies
+
+Environment Variables:Centralized Auth Site (.env.local):env
+
+FORGEROCK_CLIENT_ID=<auth-site-client-id>
+FORGEROCK_AUTH_URL=https://<forgerock-domain>/am/oauth2/authorize
+FORGEROCK_TOKEN_URL=https://<forgerock-domain>/am/oauth2/access_token
+FORGEROCK_USERINFO_URL=https://<forgerock-domain>/am/oauth2/userinfo
+NEXTAUTH_URL=https://auth.example.com
+
+Customer Portal (.env.local):env
+
+FORGEROCK_CLIENT_ID=<portal-client-id>
+FORGEROCK_AUTH_URL=https://auth.example.com/api/auth/authorize
+FORGEROCK_TOKEN_URL=https://<forgerock-domain>/am/oauth2/access_token
+FORGEROCK_USERINFO_URL=https://<forgerock-domain>/am/oauth2/userinfo
+NEXTAUTH_URL=https://portal.example.com
+
+Request Document Site (.env.local):env
+
+FORGEROCK_CLIENT_ID=<request-client-id>
+FORGEROCK_AUTH_URL=https://auth.example.com/api/auth/authorize
+FORGEROCK_TOKEN_URL=https://<forgerock-domain>/am/oauth2/access_token
+FORGEROCK_USERINFO_URL=https://<forgerock-domain>/am/oauth2/userinfo
+NEXTAUTH_URL=https://request.example.com
+
+Domains:Centralized Auth Site: https://auth.example.com
+Customer Portal: https://portal.example.com
+Request Document Site: https://request.example.com
+Shared domain: .example.com for cookie sharing.
+
+Centralized Auth Site ImplementationThe Centralized Auth Site acts as a pass-through OAuth client, redirecting to ForgeRock and forwarding the authorization code to the client site.1. Configure the ForgeRock SDKCreate lib/forgerock.ts:typescript
+
+import { Config, OAuth2Client } from "@forgerock/javascript-sdk";
+
+Config.set({
+  clientId: process.env.FORGEROCK_CLIENT_ID,
+  redirectUri: "https://auth.example.com/callback",
+  scope: "openid profile email",
+  serverConfig: {
+    baseUrl: "https://<forgerock-domain>/am/",
+    timeout: 30000,
+  },
+  tokenStore: "sessionStorage",
+});
+
+export const oauthClient = new OAuth2Client();
+
+Explanation:Configures the SDK for the Centralized Auth Site’s OAuth client.
+
+2. Authorization EndpointCreate pages/api/auth/authorize.ts:typescript
+
+import type { NextApiRequest, NextApiResponse } from "next";
+import { oauthClient } from "@/lib/forgerock";
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const { client_id, redirect_uri, state, code_challenge, code_challenge_method } = req.query;
+
+  // Validate parameters (basic validation; enhance as needed)
+  if (!client_id || !redirect_uri || !state || !code_challenge || code_challenge_method !== "S256") {
+    return res.status(400).json({ error: "Invalid request parameters" });
+  }
+
+  // Validate redirect URI (ensure it belongs to a registered client)
+  const validRedirectUris = [
+    "https://portal.example.com/api/auth/callback",
+    "https://request.example.com/api/auth/callback",
+  ];
+  if (!validRedirectUris.includes(redirect_uri as string)) {
+    return res.status(400).json({ error: "Invalid redirect URI" });
+  }
+
+  try {
+    // Redirect to ForgeRock, passing client parameters in state
+    const authUrl = await oauthClient.getAuthorizeUrl({
+      state: JSON.stringify({ client_id, redirect_uri, state, code_challenge }),
+    });
+    res.redirect(authUrl);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to initiate authentication" });
+  }
+}
+
+Explanation:Validates OAuth parameters from the client.
+Forwards the user to ForgeRock’s authorization endpoint, encoding client parameters in the state parameter for the callback.
+
+3. ForgeRock CallbackCreate pages/callback.tsx:typescript
+
+import { useEffect } from "react";
+import { useRouter } from "next/router";
+import { oauthClient } from "@/lib/forgerock";
+
+export default function CallbackPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const handleCallback = async () => {
+      try {
+        // Parse state to get original client parameters
+        const state = router.query.state ? JSON.parse(router.query.state as string) : {};
+        const { redirect_uri, state: originalState } = state;
+
+        if (!redirect_uri || !originalState) {
+          throw new Error("Invalid state");
+        }
+
+        // Redirect to client with authorization code
+        const redirectUrl = new URL(redirect_uri);
+        redirectUrl.searchParams.set("code", router.query.code as string);
+        redirectUrl.searchParams.set("state", originalState);
+        router.push(redirectUrl.toString());
+      } catch (error) {
+        console.error("Callback error:", error);
+        router.push("/?error=Authentication failed");
+      }
+    };
+
+    if (router.query.code) {
+      handleCallback();
+    }
+  }, [router]);
+
+  return <div>Processing login...</div>;
+}
+
+Explanation:Extracts the authorization code and state from ForgeRock.
+Forwards the code to the client’s redirect URI without storing it or creating a session.
+Relies on ForgeRock’s session management for SSO.
+
+4. Login PageCreate pages/index.tsx:typescript
+
+import { useState } from "react";
+import { oauthClient } from "@/lib/forgerock";
+
+export default function LoginPage() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
+      const authUrl = await oauthClient.getAuthorizeUrl();
+      window.location.href = authUrl;
+    } catch (err) {
+      setError("Failed to initiate login");
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div>
+      <h1>Centralized Auth Site</h1>
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      <button onClick={handleLogin} disabled={loading}>
+        {loading ? "Loading..." : "Sign in with ForgeRock"}
+      </button>
+    </div>
+  );
+}
+
+Explanation:Provides a fallback login page for direct access to the Centralized Auth Site.
+Initiates the ForgeRock OAuth flow.
+
+Customer Portal Site ImplementationThe Customer Portal acts as an OAuth client, exchanging the authorization code directly with ForgeRock.1. Configure NextAuth.jsCreate pages/api/auth/[...nextauth].ts:typescript
+
+import NextAuth, { AuthOptions } from "next-auth";
+import { OAuthConfig } from "next-auth/providers";
+import { setCookie } from "nookies";
+
+const oauthProvider: OAuthConfig<any> = {
+  id: "forgerock",
+  name: "ForgeRock",
+  type: "oauth",
+  authorization: {
+    url: process.env.FORGEROCK_AUTH_URL,
+    params: { scope: "openid profile email" },
+  },
+  token: process.env.FORGEROCK_TOKEN_URL,
+  userinfo: process.env.FORGEROCK_USERINFO_URL,
+  clientId: process.env.FORGEROCK_CLIENT_ID,
+  checks: ["pkce"],
+  profile(profile) {
+    return {
+      id: profile.sub,
+      name: profile.name,
+      email: profile.email,
+    };
+  },
+};
+
+export const authOptions: AuthOptions = {
+  providers: [oauthProvider],
+  session: {
+    strategy: "jwt",
+  },
+  callbacks: {
+    async jwt({ token, user, account }) {
+      if (user && account) {
+        token.id = user.id;
+        token.accessToken = account.access_token;
+        token.refreshToken = account.refresh_token;
+        token.idToken = account.id_token;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token.id) {
+        session.user.id = token.id;
+        session.accessToken = token.accessToken;
+        session.refreshToken = token.refreshToken;
+        session.idToken = token.idToken;
+      }
+      return session;
+    },
+    async signIn({ user, account }) {
+      if (account) {
+        // Store tokens in secure cookies
+        setCookie(null, "auth_access_token", account.access_token, {
+          maxAge: 3600,
+          path: "/",
+          secure: true,
+          httpOnly: true,
+          sameSite: "lax",
+        });
+        setCookie(null, "auth_id_token", account.id_token, {
+          maxAge: 3600,
+          path: "/",
+          secure: true,
+          httpOnly: true,
+          sameSite: "lax",
+        });
+        setCookie(null, "auth_refresh_token", account.refresh_token, {
+          maxAge: 30 * 24 * 60 * 60,
+          path: "/",
+          secure: true,
+          httpOnly: true,
+          sameSite: "lax",
+        });
+      }
+      return true;
+    },
+  },
+};
+
+export default NextAuth(authOptions);
+
+Explanation:Configures NextAuth.js to use ForgeRock’s OAuth endpoints directly.
+Stores tokens in secure cookies for session management.
+The signIn callback sets cookies for access, ID, and refresh tokens.
+
+2. Protect Routes with MiddlewareCreate middleware.ts:typescript
+
+import { withAuth } from "next-auth/middleware";
+
+export default withAuth({
+  callbacks: {
+    authorized: ({ token }) => !!token,
+  },
+  pages: {
+    signIn: process.env.FORGEROCK_AUTH_URL, // Redirect to Centralized Auth Site
+  },
+});
+
+export const config = {
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+};
+
+3. Create a Protected Home PageCreate pages/index.tsx:typescript
+
+import { signOut, useSession } from "next-auth/react";
+import Link from "next/link";
+
+export default function Home() {
+  const { data: session } = useSession();
+
+  if (!session) {
+    return <div>Please sign in at <a href="https://auth.example.com">Auth Site</a></div>;
+  }
+
+  return (
+    <div>
+      <h1>Customer Portal</h1>
+      <p>Welcome, {session.user?.name}</p>
+      <Link href="https://request.example.com">
+        Go to Request Document
+      </Link>
+      <button onClick={() => signOut({ callbackUrl: "https://auth.example.com" })}>
+        Sign Out
+      </button>
+    </div>
+  );
+}
+
+4. Wrap the App with SessionProviderUpdate pages/_app.tsx:typescript
+
+import { SessionProvider } from "next-auth/react";
+import type { AppProps } from "next/app";
+
+export default function App({ Component, pageProps: { session, ...pageProps } }: AppProps) {
+  return (
+    <SessionProvider session={session}>
+      <Component {...pageProps} />
+    </SessionProvider>
+  );
+}
+
+Request Document Site ImplementationThe Request Document Site is identical to the Customer Portal.1. Configure NextAuth.jsUse the same pages/api/auth/[...nextauth].ts as the Customer Portal, updating FORGEROCK_CLIENT_ID in .env.local.2. Protect Routes with MiddlewareUse the same middleware.ts.3. Create a Document Request PageCreate pages/index.tsx:typescript
+
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import { useState } from "react";
+
+export default function RequestDocument() {
+  const { data: session } = useSession();
+  const router = useRouter();
+  const [completed, setCompleted] = useState(false);
+
+  if (!session) {
+    return <div>Please sign in at <a href="https://auth.example.com">Auth Site</a></div>;
+  }
+
+  const handleComplete = () => {
+    setCompleted(true);
+    router.push("https://portal.example.com");
+  };
+
+  return (
+    <div>
+      <h1>Request Document</h1>
+      <p>User: {session.user?.name}</p>
+      <button onClick={handleComplete} disabled={completed}>
+        {completed ? "Request Completed" : "Complete Request"}
+      </button>
+    </div>
+  );
+}
+
+4. Wrap the App with SessionProviderUpdate pages/_app.tsx (same as above).SSO BehaviorForgeRock Session: ForgeRock maintains the user’s session. When redirected to ForgeRock’s authorization endpoint, an active session results in an immediate redirect back with a new authorization code, enabling SSO.
+No Local Storage: The Centralized Auth Site does not store codes or sessions, relying on ForgeRock’s session management.
+Token Management: Each client site stores tokens in secure cookies, validated via ForgeRock’s userinfo endpoint during session checks.
+
+Security ConsiderationsHTTPS: Mandatory for all sites.
+Secure Cookies: HTTP-only, secure, SameSite: lax cookies for tokens.
+PKCE: Enforced by the ForgeRock SDK and NextAuth.js.
+No Session Storage: Eliminates the need for in-memory or database storage, reducing attack surface.
+CORS: Configure ForgeRock to allow requests from all site domains.
+Token Validation: Clients can validate tokens with ForgeRock’s userinfo or introspection endpoints.
+
+Testing the FlowStart all three Next.js apps:bash
+
+npm run dev
+
+Access https://portal.example.com.
+Get redirected to https://auth.example.com/api/auth/authorize, then to ForgeRock.
+Authenticate with ForgeRock (skipped if already authenticated).
+Return to https://portal.example.com/api/auth/callback, exchange the code for tokens, and access the protected page.
+Access https://request.example.com without re-authentication (SSO).
+Complete a request and return to the Customer Portal.
+
+TroubleshootingRedirect Errors: Verify redirect URIs in ForgeRock for all clients.
+SSO Failure: Ensure ForgeRock’s session is active (check cookie settings in ForgeRock).
+Token Exchange: Confirm client IDs and PKCE parameters match ForgeRock’s configuration.
+Cookie Issues: Ensure cookies are correctly set with SameSite: lax and accessible domains.
+
+ReferencesForgeRock JavaScript SDK: ForgeRock Documentation
+NextAuth.js OAuth Provider: NextAuth.js Documentation
+OAuth 2.0: RFC 6749
+PKCE: RFC 7636
+
+This implementation provides a secure, minimal SSO system using the OAuth 2.0 Authorization Code Flow with PKCE, leveraging ForgeRock’s session management to eliminate JWT validation and code storage. Each site exchanges codes directly with ForgeRock, ensuring simplicity and security. Let me know if you need enhancements like token refresh or additional endpoints!
+
