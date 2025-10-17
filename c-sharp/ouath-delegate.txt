@@ -162,3 +162,33 @@ public record TokenResponse(string AccessToken, int ExpiresIn);
 
 ---------
 
+public class ServiceOptions
+{
+    public string BaseUrl { get; set; } = string.Empty;
+    public string ClientId { get; set; } = string.Empty;
+    public string ClientSecret { get; set; } = string.Empty;
+    public JwtAssertionOptions JwtAssertion { get; set; } = new();
+
+    public ResilienceOptions Resilience { get; set; } = new();
+}
+
+public class JwtAssertionOptions
+{
+    public bool Enabled { get; set; } = false;
+    public string KeyType { get; set; } = "RSA"; // RSA or ECDSA
+    public string PrivateKey { get; set; } = string.Empty;
+    public string Issuer { get; set; } = string.Empty;
+    public string Subject { get; set; } = string.Empty;
+    public string Audience { get; set; } = string.Empty;
+    public int TokenLifetimeSeconds { get; set; } = 3600;
+    public Dictionary<string, string> CustomClaims { get; set; } = new();
+}
+
+public class ResilienceOptions
+{
+    public int MaxRetryAttempts { get; set; } = 3;
+    public int RetryDelayMs { get; set; } = 2000;
+    public double CircuitBreakerFailureRatio { get; set; } = 0.5;
+    public int CircuitBreakerBreakDurationSeconds { get; set; } = 60;
+    public int TimeoutSeconds { get; set; } = 10;
+}
