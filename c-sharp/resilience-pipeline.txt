@@ -1,0 +1,40 @@
+using Polly;
+using Polly.CircuitBreaker;
+using Polly.Retry;
+
+// Add loggings i.e. structured logs for resilience policies like retry, timeout, circuit breaker, and rate limiter to this ResiliencePipelineExtensions: 
+public static class ResiliencePipelineExtensions
+{
+    public static void AddStandardPolicies(this ResiliencePipelineBuilder builder, ILogger logger)
+    {
+
+        builder.AddRetry(new RetryStrategyOptions
+        {
+            MaxRetryAttempts = 3,
+            Delay = TimeSpan.FromMilliseconds(200),
+            BackoffType = DelayBackoffType.Exponential,
+            UseJitter = true,
+            ShouldHandle = args => new ValueTask<bool>(args.Outcome.Exception is not null),
+            OnRetry = args =>
+            {
+                var ex = args.Outcome.Exception;
+                logger.LogWarning("Retry attempt {Attempt} for {OperationKey}. Exception: {ExceptionType} - {Message}",
+                    args.AttemptNumber,
+                    args.Context.OperationKey,
+                    ex?.GetType().Name,
+                    ex?.Message);
+                return default;
+            }
+        });
+
+        builder.AddTimeout(TimeSpan.FromSeconds(5));
+
+        builder.AddCircuitBreaker(new CircuitBreakerStrategyOptions
+        {
+            FailureRatio = 0.5,
+            MinimumThroughput = 10,
+            SamplingDuration = TimeSpan.FromSeconds(30),
+            BreakDuration = TimeSpan.FromSeconds(15)
+        });
+    }
+}
