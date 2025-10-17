@@ -1,0 +1,164 @@
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
+using System.Security.Cryptography;
+
+namespace Order.Api.Clients;
+
+public class OAuthDelegatingHandler : DelegatingHandler
+{
+    private readonly IOptions<PaymentServiceOptions> _options;
+    private readonly ILogger<OAuthDelegatingHandler> _logger;
+    private string _accessToken = string.Empty;
+    private DateTime _tokenExpiry = DateTime.MinValue;
+
+    public OAuthDelegatingHandler(IOptions<PaymentServiceOptions> options, ILogger<OAuthDelegatingHandler> logger)
+    {
+        _options = options ?? throw new ArgumentNullException(nameof(options));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(_accessToken) || DateTime.UtcNow >= _tokenExpiry)
+        {
+            await RefreshAccessTokenAsync(cancellationToken);
+        }
+
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _accessToken);
+        return await base.SendAsync(request, cancellationToken);
+    }
+
+    private async Task RefreshAccessTokenAsync(CancellationToken cancellationToken)
+    {
+        _logger.LogInformation("Refreshing OAuth access token for Payment Service.");
+
+        var jwtOptions = _options.Value.JwtAssertion;
+        var tokenRequest = new HttpRequestMessage(HttpMethod.Post, $"{_options.Value.BaseUrl}/api/token");
+
+        if (jwtOptions.Enabled)
+        {
+            var jwt = GenerateJwtAssertion();
+            tokenRequest.Content = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["grant_type"] = "client_credentials",
+                ["client_assertion_type"] = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+                ["client_assertion"] = jwt
+            });
+        }
+        else
+        {
+            tokenRequest.Content = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["client_id"] = _options.Value.ClientId,
+                ["client_secret"] = _options.Value.ClientSecret,
+                ["grant_type"] = "client_credentials"
+            });
+        }
+
+        using var client = new HttpClient();
+        try
+        {
+            var response = await client.SendAsync(tokenRequest, cancellationToken);
+            response.EnsureSuccessStatusCode();
+
+            var tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>(cancellationToken);
+            if (tokenResponse == null || string.IsNullOrEmpty(tokenResponse.AccessToken))
+            {
+                _logger.LogError("Failed to obtain access token: Response is null or empty.");
+                throw new InvalidOperationException("Failed to obtain access token.");
+            }
+
+            _accessToken = tokenResponse.AccessToken;
+            _tokenExpiry = DateTime.UtcNow.AddSeconds(tokenResponse.ExpiresIn - 60);
+            _logger.LogInformation("Access token refreshed successfully, expires in {ExpiresInSeconds}s.", tokenResponse.ExpiresIn - 60);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to refresh OAuth access token.");
+            throw;
+        }
+    }
+
+    private string GenerateJwtAssertion()
+    {
+        var jwtOptions = _options.Value.JwtAssertion;
+        _logger.LogDebug("Generating JWT assertion with KeyType: {KeyType}", jwtOptions.KeyType);
+
+        SecurityKey signingKey = jwtOptions.KeyType.ToLower() switch
+        {
+            "rsa" => CreateRsaSecurityKey(jwtOptions.PrivateKey),
+            "ecdsa" => CreateECDsaSecurityKey(jwtOptions.PrivateKey),
+            _ => throw new InvalidOperationException($"Unsupported key type: {jwtOptions.KeyType}")
+        };
+
+        var signingCredentials = new SigningCredentials(signingKey,
+            jwtOptions.KeyType.ToLower() == "rsa" ? SecurityAlgorithms.RsaSha256 : SecurityAlgorithms.EcdsaSha256);
+
+        var claims = new Dictionary<string, object>
+        {
+            { JwtRegisteredClaimNames.Iss, jwtOptions.Issuer },
+            { JwtRegisteredClaimNames.Sub, jwtOptions.Subject },
+            { JwtRegisteredClaimNames.Aud, jwtOptions.Audience },
+            { JwtRegisteredClaimNames.Exp, DateTimeOffset.UtcNow.AddSeconds(jwtOptions.TokenLifetimeSeconds).ToUnixTimeSeconds() },
+            { JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds() },
+            { JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString() }
+        };
+
+        // Add custom claims
+        foreach (var claim in jwtOptions.CustomClaims)
+        {
+            claims.Add(claim.Key, claim.Value);
+        }
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new System.Security.Claims.ClaimsIdentity(claims.Select(c => new System.Security.Claims.Claim(c.Key, c.Value.ToString()))),
+            SigningCredentials = signingCredentials
+        };
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var jwt = tokenHandler.CreateJwtSecurityToken(tokenDescriptor);
+        var jwtString = tokenHandler.WriteToken(jwt);
+
+        _logger.LogDebug("JWT assertion generated successfully with claims: {Claims}", string.Join(", ", claims.Select(c => $"{c.Key}={c.Value}")));
+        return jwtString;
+    }
+
+    private SecurityKey CreateRsaSecurityKey(string privateKeyPem)
+    {
+        try
+        {
+            var rsa = RSA.Create();
+            rsa.ImportFromPem(privateKeyPem);
+            return new RsaSecurityKey(rsa);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to parse RSA private key.");
+            throw new InvalidOperationException("Invalid RSA private key format.", ex);
+        }
+    }
+
+    private SecurityKey CreateECDsaSecurityKey(string privateKeyPem)
+    {
+        try
+        {
+            var ecdsa = ECDsa.Create();
+            ecdsa.ImportFromPem(privateKeyPem);
+            return new ECDsaSecurityKey(ecdsa);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to parse ECDSA private key.");
+            throw new InvalidOperationException("Invalid ECDSA private key format.", ex);
+        }
+    }
+}
+
+public record TokenResponse(string AccessToken, int ExpiresIn);
+
+
+---------
+
