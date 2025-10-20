@@ -1,0 +1,377 @@
+Overview of JWT Assertion Flow with Ping Identity (ForgeRock)The JWT Assertion flow (also known as the JWT Bearer Grant per RFC 7523) allows a client application to authenticate a user (or service) by sending a signed JSON Web Token (JWT) as an assertion to the authorization server (Ping Identity/ForgeRock AM or PingOne Advanced Identity Cloud). This is useful for machine-to-machine or existing authentication systems where the client (or a trusted issuer) generates a JWT representing the user's identity, signed with a private key. The server validates the JWT using the corresponding public key and issues an access token.Key concepts:Assertion JWT: A signed JWT containing standard claims (e.g., iss, sub, aud, exp) plus custom claims. The iss must match a trusted issuer configured in Ping Identity.
+Private Key Signing: Use an asymmetric key pair (e.g., RS256). The private key signs the assertion; the public key is registered in Ping Identity.
+Custom Claims: Additional non-standard claims (e.g., roles: ["admin"]) can be added to the JWT payload for passing extra user context. These are opaque to the flow but can be used in policy decisions or introspection.
+Ping Identity Configuration: Create a Trusted JWT Issuer profile (under Realms > Applications > OAuth 2.0 > Trusted JWT Issuers) with the issuer ID and public key (JWK format).
+Enable JWT Bearer grant type on the OAuth client.
+Configure scopes and audience (e.g., the protected API's resource server).
+
+Well-Known Issuer URL: The protected API uses OpenID Connect discovery (e.g., https://<ping-tenant>/am/oauth2/.well-known/openid-configuration) to fetch issuer metadata, JWKS, etc.
+
+This setup assumes:Ping Identity as the authorization server (e.g., URL: https://<your-ping-tenant>.forgerock.io/am/oauth2/realms/root).
+Client ID: myClient (confidential client with JWT Bearer grant enabled).
+Private key: An RSA key pair (generate via OpenSSL: openssl genrsa -out private.pem 2048).
+Custom claim example: department: "Engineering".
+
+The flow is not for browser-based apps (use Authorization Code flow instead). It's ideal for backend services.Steps to ImplementPrepare Keys and Configuration:Generate an RSA private key (PEM format) and extract the public key (JWK).
+In Ping Identity Admin UI:Register the client (myClient) with grant type "JWT Bearer".
+Create a Trusted JWT Issuer with iss (e.g., https://myapp.com), audience (https://protected-api.com), and upload the public JWK.
+Note the token endpoint (e.g., /am/oauth2/realms/root/access_token).
+
+Generate the Assertion JWT:Build a JWT payload with claims:Required: iss (trusted issuer), sub (user ID, e.g., email), aud (token endpoint or client ID), exp (expiry, e.g., 5 min), iat (issued at).
+Custom: e.g., { "custom_claim": "value" }.
+
+Sign with RS256 using the private key.
+
+Exchange Assertion for Access Token:POST to token endpoint with grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer, assertion=<signed-jwt>, scope=<scopes>.
+Optionally, use client authentication (e.g., client secret or another JWT for client auth).
+
+Call Protected API:Attach the access token as Authorization: Bearer <access_token>.
+
+Configure Protected API:Use ASP.NET Core's JWT Bearer middleware with the well-known issuer URL for automatic validation.
+
+Error Handling:Common issues: Invalid signature (public key mismatch), expired JWT, untrusted issuer.
+Log invalid_grant or invalid_assertion errors.
+
+Security Notes:Keep the private key secure (e.g., Azure Key Vault).
+Use short expiry for assertions.
+Validate scopes in the access token.
+
+Client API: C# .NET 8+ API to Acquire and Use TokenThis is a minimal ASP.NET Core 8 Web API that:Has a /acquire-token endpoint to generate the assertion JWT, exchange it for an access token, and return it.
+Has a /call-protected endpoint that acquires a token (if needed) and calls a sample protected API (replace with your URL).
+Uses System.IdentityModel.Tokens.Jwt for JWT handling.
+Loads private key from appsettings.json (base64-encoded PEM) or file.
+
+Project SetupCreate a new Web API project: dotnet new webapi -n JwtClientApi --framework net8.0.
+Add NuGet packages: dotnet add package System.IdentityModel.Tokens.Jwt, dotnet add package Microsoft.Extensions.Http.
+Add to appsettings.json:
+
+{
+  "JwtSettings": {
+    "PrivateKey": "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA... (base64 PEM content)\n-----END RSA PRIVATE KEY-----",
+    "Issuer": "https://myapp.com",
+    "Audience": "https://protected-api.com",
+    "TokenEndpoint": "https://<your-ping-tenant>.forgerock.io/am/oauth2/realms/root/access_token",
+    "ClientId": "myClient",
+    "Scope": "openid profile read",
+    "UserSubject": "user@example.com",
+    "CustomClaims": {
+      "department": "Engineering",
+      "roles": ["admin"]
+    }
+  },
+  "ProtectedApi": {
+    "BaseUrl": "https://your-protected-api.com/api/test"
+  }
+}
+
+----
+
+
+Provide the details, steps and c# code for implementing JWT Assertion flow with custom claims and private key using Ping Identity (ForgeRock). Provide a client API i.e. c# .net core 8+ API which will acquire a jwt token and attach the acquired token as a bearer token to call a protected API. The protected API i.e. c# .net core 8+ API uses Microsoft JWT bearer authentication configured with well-known issuer URL.
+
+
+
+-----
+
+JwtAssertionGenerator handles JWT creation.
+TokenExchanger handles HTTP token exchange.
+TokenService orchestrates the flow.
+ConfigurationValidator ensures valid settings.
+
+----
+
+public class JwtSettings
+{
+    public string PrivateKey { get; set; } = string.Empty;
+    public string Issuer { get; set; } = string.Empty;
+    public string Audience { get; set; } = string.Empty;
+    public string TokenEndpoint { get; set; } = string.Empty;
+    public string ClientId { get; set; } = string.Empty;
+    public string Scope { get; set; } = string.Empty;
+    public string UserSubject { get; set; } = string.Empty;
+    public Dictionary<string, object> CustomClaims { get; set; } = new();
+}
+
+
+-----
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text.Json;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+
+public class JwtAssertionGenerator : IJwtAssertionGenerator, IDisposable
+{
+    private readonly JwtSettings _settings;
+    private readonly RSA _rsaKey;
+    private bool _disposed;
+
+    public JwtAssertionGenerator(IOptions<JwtSettings> settings, IConfigurationValidator validator)
+    {
+        _settings = settings.Value ?? throw new ArgumentNullException(nameof(settings));
+        validator.Validate(_settings);
+
+        _rsaKey = RSA.Create();
+        try
+        {
+            _rsaKey.ImportFromPem(_settings.PrivateKey.ToCharArray());
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException("Failed to load RSA private key.", ex);
+        }
+    }
+
+    public string GenerateAssertion()
+    {
+        var now = DateTimeOffset.UtcNow;
+        var claims = CreateClaims(now);
+        var tokenDescriptor = CreateTokenDescriptor(claims);
+        return CreateJwtToken(tokenDescriptor);
+    }
+
+    private List<Claim> CreateClaims(DateTimeOffset now)
+    {
+        var claims = new List<Claim>
+        {
+            new(JwtRegisteredClaimNames.Iss, _settings.Issuer),
+            new(JwtRegisteredClaimNames.Sub, _settings.UserSubject),
+            new(JwtRegisteredClaimNames.Aud, _settings.Audience),
+            new(JwtRegisteredClaimNames.Iat, now.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+            new(JwtRegisteredClaimNames.Exp, now.AddMinutes(5).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) // Unique JWT ID
+        };
+
+        foreach (var kvp in _settings.CustomClaims)
+        {
+            var claimValue = kvp.Value is string str ? str : JsonSerializer.Serialize(kvp.Value);
+            claims.Add(new Claim(kvp.Key, claimValue));
+        }
+
+        return claims;
+    }
+
+    private SecurityTokenDescriptor CreateTokenDescriptor(IEnumerable<Claim> claims)
+    {
+        return new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(claims),
+            SigningCredentials = new SigningCredentials(new RsaSecurityKey(_rsaKey), SecurityAlgorithms.RsaSha256)
+        };
+    }
+
+    private string CreateJwtToken(SecurityTokenDescriptor tokenDescriptor)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
+    }
+
+    public void Dispose()
+    {
+        if (!_disposed)
+        {
+            _rsaKey?.Dispose();
+            _disposed = true;
+        }
+    }
+}
+
+---
+
+using System.Net.Http;
+using System.Text.Json;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
+
+public class TokenExchanger : ITokenExchanger
+{
+    private readonly JwtSettings _settings;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly ILogger<TokenExchanger> _logger;
+
+    public TokenExchanger(
+        IOptions<JwtSettings> settings,
+        IHttpClientFactory httpClientFactory,
+        IConfigurationValidator validator,
+        ILogger<TokenExchanger> logger)
+    {
+        _settings = settings.Value ?? throw new ArgumentNullException(nameof(settings));
+        _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        validator.Validate(_settings);
+    }
+
+    public async Task<string> ExchangeForAccessTokenAsync(string assertion, CancellationToken cancellationToken = default)
+    {
+        using var httpClient = _httpClientFactory.CreateClient();
+        var requestContent = BuildRequestContent(assertion);
+
+        _logger.LogInformation("Exchanging JWT assertion for access token at {TokenEndpoint}", _settings.TokenEndpoint);
+        var response = await httpClient.PostAsync(_settings.TokenEndpoint, requestContent, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+            _logger.LogError("Token exchange failed with status {StatusCode}: {Error}", response.StatusCode, errorContent);
+            throw new HttpRequestException($"Token exchange failed: {response.StatusCode}. Details: {errorContent}");
+        }
+
+        var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+        return ExtractAccessToken(responseContent);
+    }
+
+    private FormUrlEncodedContent BuildRequestContent(string assertion)
+    {
+        return new FormUrlEncodedContent(new[]
+        {
+            new KeyValuePair<string, string>("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer"),
+            new KeyValuePair<string, string>("client_id", _settings.ClientId),
+            new KeyValuePair<string, string>("assertion", assertion),
+            new KeyValuePair<string, string>("scope", _settings.Scope)
+        });
+    }
+
+    private string ExtractAccessToken(string responseContent)
+    {
+        try
+        {
+            using var doc = JsonDocument.Parse(responseContent);
+            var accessToken = doc.RootElement.GetProperty("access_token").GetString();
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                _logger.LogError("Access token missing in response: {Response}", responseContent);
+                throw new InvalidOperationException("Access token not found in response.");
+            }
+            _logger.LogInformation("Access token acquired successfully");
+            return accessToken;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to parse token response: {Response}", responseContent);
+            throw new InvalidOperationException("Failed to parse token response.", ex);
+        }
+    }
+}
+
+----
+
+using Microsoft.Extensions.Logging;
+
+public class TokenService
+{
+    private readonly IJwtAssertionGenerator _assertionGenerator;
+    private readonly ITokenExchanger _tokenExchanger;
+    private readonly ILogger<TokenService> _logger;
+
+    public TokenService(
+        IJwtAssertionGenerator assertionGenerator,
+        ITokenExchanger tokenExchanger,
+        ILogger<TokenService> logger)
+    {
+        _assertionGenerator = assertionGenerator ?? throw new ArgumentNullException(nameof(assertionGenerator));
+        _tokenExchanger = tokenExchanger ?? throw new ArgumentNullException(nameof(tokenExchanger));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    }
+
+    public async Task<string> AcquireTokenAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger.LogInformation("Starting token acquisition");
+            var assertion = _assertionGenerator.GenerateAssertion();
+            var accessToken = await _tokenExchanger.ExchangeForAccessTokenAsync(assertion, cancellationToken);
+            _logger.LogInformation("Token acquisition completed successfully");
+            return accessToken;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Token acquisition failed");
+            throw;
+        }
+    }
+}
+
+
+-----
+
+Protected API
+
+{
+  "JwtBearer": {
+    "IssuerUri": "https://<your-ping-tenant>.forgerock.io/am/oauth2/realms/root",
+    "Audience": "https://protected-api.com"  // Match your resource/audience
+  }
+}
+
+
+public class JwtBearerSettings
+{
+    public string IssuerUri { get; set; } = string.Empty;
+    public string Audience { get; set; } = string.Empty;
+}
+
+-----
+
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Configure JWT Bearer authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var jwtSettings = builder.Configuration.GetSection("JwtBearer").Get<JwtBearerSettings>()!;
+        options.Authority = jwtSettings.IssuerUri; // Fetches JWKS from .well-known
+        options.Audience = jwtSettings.Audience;
+        options.RequireHttpsMetadata = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true
+        };
+    });
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+
+app.Run();
+
+------
+
+
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class TestController : ControllerBase
+{
+    [HttpGet]
+    public IActionResult Get()
+    {
+        var claims = User.Claims.Select(c => new { c.Type, c.Value }).ToList();
+        var department = User.FindFirst("department")?.Value;
+        var roles = User.FindFirst("roles")?.Value;
+        return Ok(new
+        {
+            message = "Protected endpoint accessed",
+            claims,
+            department,
+            roles
+        });
+    }
+}
