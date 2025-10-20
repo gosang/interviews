@@ -1,0 +1,99 @@
+
+ "Auth0": {
+   "Domain": ".auth0.com",
+   "ClientId": "",
+   "ClientSecret": "",
+   "Audience": ""
+ },
+
+ -----
+
+launch settings
+
+"applicationUrl": "http://localhost:5001"
+
+ -----
+
+ // Endpoint to acquire token and call protected API
+app.MapGet("/call-protected", async (IHttpClientFactory clientFactory, IConfiguration configuration) =>
+{
+    // Step 1: Request token from Auth0
+    var tokenEndpoint = $"https://{configuration["Auth0:Domain"]}/oauth/token";
+    var httpClient = clientFactory.CreateClient();
+    var requestContent = new FormUrlEncodedContent(new[]
+    {
+        new KeyValuePair<string, string>("grant_type", "client_credentials"),
+        new KeyValuePair<string, string>("client_id", configuration["Auth0:ClientId"]),
+        new KeyValuePair<string, string>("client_secret", configuration["Auth0:ClientSecret"]),
+        new KeyValuePair<string, string>("audience", configuration["Auth0:Audience"]),
+        //new KeyValuePair<string, string>("scope", "read:data custom_scope:admin") // Request custom claims
+    });
+
+    var response = await httpClient.PostAsync(tokenEndpoint, requestContent);
+    if (!response.IsSuccessStatusCode)
+    {
+        return Results.BadRequest("Failed to acquire token");
+    }
+
+    var tokenJson = await response.Content.ReadFromJsonAsync<JsonElement>();
+    var accessToken = tokenJson.GetProperty("access_token").GetString();
+
+    Console.WriteLine("accessToken: " + accessToken);
+
+    // Step 2: Call protected API with bearer token
+    var protectedClient = clientFactory.CreateClient();
+    protectedClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+    var protectedResponse = await protectedClient.GetAsync("http://localhost:5002/weatherforecast");
+
+    if (!protectedResponse.IsSuccessStatusCode)
+    {
+        return Results.BadRequest("Protected API call failed");
+    }
+
+    var result = await protectedResponse.Content.ReadAsStringAsync();
+
+    return Results.Ok(result);
+
+
+    ------
+
+// Configure JWT Bearer authentication with Auth0
+var domain = "https://dev-skym6mi0dw4dbn11.us.auth0.com"; // Auth0 domain
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = domain; // Fetches well-known config and JWKS
+        options.Audience = "https://protected-api"; // Must match Auth0 API audience
+        options.TokenValidationParameters = new()
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapGet("/weatherforecast", () =>
+{
+    // Access custom claims, e.g., User.FindFirst("role")?.Value
+
+    return Results.Ok(new { Message = "Protected data", Timestamp = DateTime.UtcNow });
+
+}).RequireAuthorization()
+.WithName("GetWeatherForecast")
+.WithOpenApi();
+
+
+----
+
+launch settings
+"applicationUrl": "http://localhost:5002"
+
