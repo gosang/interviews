@@ -1,0 +1,13 @@
+Provide the details, steps and c# code for implementing JWT Assertion (client credentials flow) with custom claims using 
+Ping Identity (ForgeRock). Provide a client API i.e. c# .net core 8 API which will acquire a jwt token and attach the acquired token as a bearer token to call a protected API. 
+The protected API i.e. c# .net core 8 API uses Microsoft JWT bearer authentication configured with well-known issuer URL.
+
+The response's access_token is opaque and is not signed JWT. Provide the details and steps to configure or setup 
+the response's access_token as signed JWT.
+
+In ForgeRock (AM), there is no Access Token Configuration in the OAuth2 Provider that the access toekn format can be changed to JWT.
+
+
+OAuth2 Access Token Modification Dynamic Script for the request assertion payload.
+
+Setup and configure the Script at the client app level, not at the realm OAuth Provider level.
