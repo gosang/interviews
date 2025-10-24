@@ -11,3 +11,8 @@ In ForgeRock (AM), there is no Access Token Configuration in the OAuth2 Provider
 OAuth2 Access Token Modification Dynamic Script for the request assertion payload.
 
 Setup and configure the Script at the client app level, not at the realm OAuth Provider level.
+
+
+https://support.pingidentity.com/s/article/How-do-I-add-custom-claims-to-the-OIDC-Claims-Script-in-PingAM
+https://apidocs.pingidentity.com/pingone/auth/v1/api/#create-a-private-key-jwt
+https://docs.pingidentity.com/pingoneaic/latest/am-oauth2/plugins-access-token-modifier.html
