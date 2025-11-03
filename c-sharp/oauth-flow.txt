@@ -1,0 +1,33 @@
+Use access_token and id_token from cookies instead of relying on the standard OAuth authorization and token endpoints in NextAuth.js with a ForgeRock custom provider, 
+you’ll need to bypass the default token exchange and manually inject the tokens into the session. Here's a complete breakdown of how to do this securely and correctly:
+
+✅ Goal
+Use access_token and id_token from cookies (already set by ForgeRock after centralized login).
+
+Fetch user info from ForgeRock’s userinfo endpoint using access_token.
+
+Verify the id_token using ForgeRock’s jwks_uri and issuer.
+
+Maintain a valid NextAuth session using the jwt strategy.
+
+🧩 Key Components
+1. Cookies
+Ensure the centralized ForgeRock login flow sets these cookies:
+
+access_token
+
+id_token
+
+2. Custom Provider Without Authorization/Token Exchange
+You skip the authorization and token steps and instead inject tokens directly.
+
+3. Custom authorize Method
+Use a custom authorize method in a Credentials Provider to:
+
+Read cookies
+
+Verify the id_token
+
+Fetch user info using access_token
+
+Return a user object to establish the session
