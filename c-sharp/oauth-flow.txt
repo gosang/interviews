@@ -241,3 +241,219 @@ export default function Login() {
 }
 
 
+####### Client Site
+
+// .env.local
+NEXT_PUBLIC_FORGEROCK_BASE_URL=
+NEXT_PUBLIC_FORGEROCK_CLIENT_ID=
+NEXT_PUBLIC_FORGEROCK_REALM=
+NEXT_PUBLIC_AUTH_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_CUSTOMER_PORTAL_URL=http://localhost:3001
+NEXT_PUBLIC_AUTH_SECRET=
+
+
+// lib/verifyToken.ts
+import { jwtVerify, createRemoteJWKSet } from "jose";
+
+export async function verifyForgeRockIdToken(idToken: string) {
+  console.log("Requesting verify token: " + idToken);
+
+  const jwksUri = new URL(
+    process.env.NEXT_PUBLIC_FORGEROCK_BASE_URL + "/oauth2/alpha/connect/jwk_uri"
+  );
+  const keyStore = createRemoteJWKSet(jwksUri);
+
+  const { payload } = await jwtVerify(idToken, keyStore, {
+    issuer: process.env.NEXT_PUBLIC_FORGEROCK_BASE_URL + "/oauth2/alpha",
+    audience: process.env.NEXT_PUBLIC_FORGEROCK_CLIENT_ID,
+  });
+
+  console.log("Verify token: " + payload);
+
+  return payload;
+}
+
+// Without Credentials
+// api/auth/[...nextauth].ts
+
+import NextAuth from "next-auth";
+import { parse } from "cookie";
+import { JWT } from "next-auth/jwt";
+import { verifyForgeRockIdToken } from "@/lib/verifyToken";
+
+const forgerockProvider = (req: { headers: { cookie: any } }) => {
+  const cookies = parse(req.headers.cookie || "");
+  const code = cookies.oauth_code;
+  const verifier = cookies.oauth_verifier;
+  const accessToken = cookies.access_token;
+  const idToken = cookies.id_token;
+
+  console.log("code: " + code + " verifier: " + verifier);
+
+  console.log("accessToken: " + accessToken + " idToken: " + idToken);
+
+  return {
+    id: "forgerock",
+    name: "ForgeRock",
+    type: "oauth",
+    clientId: process.env.NEXT_PUBLIC_FORGEROCK_CLIENT_ID,
+    //clientSecret: "", // PKCE only
+    authorization: {
+      url:
+        process.env.NEXT_PUBLIC_FORGEROCK_BASE_URL + "/oauth2/alpha/authorize",
+      params: { scope: "openid profile email", response_type: "code" },
+    },
+    checks: ["pkce", "state"],
+    idToken: true,
+    token: {
+      url:
+        process.env.NEXT_PUBLIC_FORGEROCK_BASE_URL +
+        "/oauth2/alpha/access_token",
+      async request(context) {
+        console.log(
+          "Token requesting with code: " + code + " verifier: " + verifier
+        );
+
+        const body = new URLSearchParams({
+          grant_type: "authorization_code",
+          code: code || "",
+          redirect_uri: "http://localhost:3001/api/auth/callback/forgerock",
+          client_id: context.provider.clientId,
+          code_verifier: verifier || "",
+        });
+
+        const res = await fetch(context.provider.token.url, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: body.toString(),
+        });
+
+        console.log("Token request response: " + JSON.stringify(res));
+
+        const tokens = await res.json();
+
+        console.log("Token response: " + tokens);
+
+        if (!res.ok)
+          throw new Error(`Token exchange failed: ${JSON.stringify(tokens)}`);
+        return { tokens };
+      },
+    },
+    userinfo: {
+      url:
+        process.env.NEXT_PUBLIC_FORGEROCK_BASE_URL + "/oauth2/alpha/userinfo",
+    },
+    profile(profile) {
+      return {
+        id: profile.sub,
+        name: profile.name,
+        email: profile.email,
+      };
+    },
+  };
+};
+
+
+// With Credentials
+// api/auth/[...nextauth].ts
+
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { parse } from "cookie";
+import { jwtVerify, createRemoteJWKSet } from "jose";
+
+// Helper to verify ForgeRock ID token
+async function verifyForgeRockIdToken(idToken: string) {
+  const JWKS = createRemoteJWKSet(
+    new URL(
+      `${process.env.NEXT_PUBLIC_FORGEROCK_BASE_URL}/oauth2/alpha/connect/jwk_uri`
+    )
+  );
+
+  const { payload } = await jwtVerify(idToken, JWKS, {
+    issuer: `${process.env.NEXT_PUBLIC_FORGEROCK_BASE_URL}/oauth2/alpha`,
+    audience: process.env.NEXT_PUBLIC_FORGEROCK_CLIENT_ID,
+  });
+
+  return payload;
+}
+
+export default async function auth(req, res) {
+  return await NextAuth(req, res, {
+    providers: [
+      CredentialsProvider({
+        id: "forgerock",
+        name: "ForgeRock",
+        credentials: {},
+        async authorize(_, req) {
+          const cookies = parse(req.headers.cookie || "");
+          const accessToken = cookies.access_token;
+          const idToken = cookies.id_token;
+
+          if (!accessToken || !idToken) {
+            console.error("Missing access_token or id_token in cookies");
+            return null;
+          }
+
+          try {
+            // Verify ID token
+            const decoded = await verifyForgeRockIdToken(idToken);
+
+            // Fetch user info
+            const userinfoRes = await fetch(
+              `${process.env.NEXT_PUBLIC_FORGEROCK_BASE_URL}/oauth2/alpha/userinfo`,
+              {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                },
+              }
+            );
+
+            if (!userinfoRes.ok) {
+              console.error("Failed to fetch userinfo");
+              return null;
+            }
+
+            const profile = await userinfoRes.json();
+
+            return {
+              id: profile.sub,
+              name: profile.name,
+              email: profile.email,
+              accessToken,
+              idToken,
+            };
+          } catch (err) {
+            console.error("ForgeRock authorization failed:", err);
+            return null;
+          }
+        },
+      }),
+    ],
+    session: { strategy: "jwt" },
+    jwt: { encryption: false },
+    secret: process.env.NEXT_PUBLIC_AUTH_SECRET,
+    debug: true,
+    callbacks: {
+      async jwt({ token, user }) {
+        if (user) {
+          token.sub = user.id;
+          token.name = user.name;
+          token.email = user.email;
+          token.accessToken = user.accessToken;
+          token.idToken = user.idToken;
+        }
+        return token;
+      },
+      async session({ session, token }) {
+        session.user = {
+          name: token.name,
+          email: token.email,
+        };
+        session.accessToken = token.accessToken;
+        session.idToken = token.idToken;
+        return session;
+      },
+    },
+  });
+}
