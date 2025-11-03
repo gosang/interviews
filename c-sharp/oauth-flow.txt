@@ -31,3 +31,213 @@ Verify the id_token
 Fetch user info using access_token
 
 Return a user object to establish the session
+
+
+
+####### Auth Site
+// env.local
+NEXT_PUBLIC_FORGEROCK_BASE_URL=
+NEXT_PUBLIC_FORGEROCK_CLIENT_ID=
+NEXT_PUBLIC_FORGEROCK_REALM=
+NEXT_PUBLIC_FORGEROCK_TREE=
+NEXT_PUBLIC_AUTH_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_CUSTOMER_PORTAL_URL=http://localhost:3001
+
+
+//lib/frConfig.ts
+import { Config } from "@forgerock/javascript-sdk";
+
+export function configureForgeRock() {
+  Config.set({
+    clientId: process.env.NEXT_PUBLIC_FORGEROCK_CLIENT_ID!,
+    redirectUri: `${process.env.NEXT_PUBLIC_AUTH_SITE_URL}/callback`,
+    scope: "openid profile email",
+    serverConfig: {
+      baseUrl: process.env.NEXT_PUBLIC_FORGEROCK_BASE_URL!,
+      timeout: 30000,
+    },
+    realmPath: process.env.NEXT_PUBLIC_FORGEROCK_REALM || "alpha",
+    tree: process.env.NEXT_PUBLIC_FORGEROCK_TREE || "GoLogin",
+    oauthThreshold: 0.8,
+  });
+}
+
+// _app.tsx
+if (typeof window !== "undefined") {
+  configureForgeRock();
+}
+
+// callback.tsx
+import { useEffect } from "react";
+import { OAuth2Client, TokenManager } from "@forgerock/javascript-sdk";
+import { setCookie, getCookie } from "cookies-next";
+import { useRouter } from "next/router";
+
+export default function Callback() {
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    const processCallback = async () => {
+      const auth_verifier = await getCookie("oauth_verifier");
+
+      console.log("auth_verifier cookie:  " + auth_verifier);
+
+      console.log("code and state extracting from router query....");
+      const { code, state, code_challenge, verifier } = router.query;
+
+      console.log(
+        "code, state, verifier extracted....code: " +
+          code +
+          " state: " +
+          state +
+          " verifier: " +
+          verifier +
+          " code_challenge: " +
+          code_challenge
+      );
+
+      const portalRedirectUri =
+        process.env.NEXT_PUBLIC_CUSTOMER_PORTAL_URL +
+        "/api/auth/callback/forgerock";
+
+      // Ensure both code and state are present
+      // if (
+      //   typeof code !== "string" ||
+      //   typeof auth_verifier !== "string" ||
+      //   typeof state !== "string"
+      // ) {
+      //   console.error("Missing authorization code or verifier or state");
+      //   return;
+      // }
+
+      const authorizationCode = code as string;
+      const authorizationState = state as string;
+
+      console.log(
+        `authorizationCode: ${authorizationCode} and authorizationState: ${authorizationState}`
+      );
+
+      try {
+        // const sdkToken = await TokenManager.getTokens({
+        //   query: {
+        //     code: authorizationCode,
+        //     state: authorizationState,
+        //   },
+        // });
+
+        // const sdkToken = await TokenManager.getTokens({
+        //   forceRenew: false, // Will immediately return stored tokens, if they exist
+        //   login: "redirect", // If user authentication is handled in external Web app
+        // });
+
+        // const sdkToken = await TokenManager.getTokens();
+
+        // console.log("sdkToken: " + sdkToken);
+
+        const tokens = await OAuth2Client.getOAuth2Tokens({
+          clientId: process.env.NEXT_PUBLIC_FORGEROCK_CLIENT_ID,
+          // tokenStore: "sessionStorage",
+          authorizationCode: code as string,
+          verifier: auth_verifier as string,
+        });
+
+        console.log("tokens: " + tokens);
+
+        const cookieOptions = {
+          path: "/",
+          httpOnly: false,
+          secure: false,
+          sameSite: "lax" as const,
+        };
+
+        // Store tokens in secure HTTP-only cookies
+        setCookie("access_token", tokens.accessToken, cookieOptions);
+        setCookie("id_token", tokens.idToken || "", cookieOptions);
+        // setCookie("refresh_token", refreshToken || "", cookieOptions);
+        setCookie("next-auth.state", state, cookieOptions);
+        setCookie("oauth_code", code, cookieOptions);
+        // setCookie("oauth_verifier", auth_verifier, cookieOptions);
+
+        window.location.href = portalRedirectUri;
+      } catch (err) {
+        console.error("Token exchange failed:", err);
+      }
+    };
+
+    processCallback();
+  }, [router.isReady, router.query]);
+
+  return <p>Processing authentication...</p>;
+}
+
+// login.tsx
+import { useEffect } from "react";
+import { OAuth2Client, ResponseType, PKCE } from "@forgerock/javascript-sdk";
+import { setCookie } from "cookies-next";
+
+export default function Login() {
+  useEffect(() => {
+    (async () => {
+      const verifier = PKCE.createVerifier();
+      const state = PKCE.createState();
+
+      const authorizeUrl = await OAuth2Client.createAuthorizeUrl({
+        responseType: ResponseType.Code,
+        state,
+        verifier: verifier,
+        clientId: process.env.NEXT_PUBLIC_FORGEROCK_CLIENT_ID!,
+      });
+
+      console.log(`state: ${state}, verifier: ${verifier}`);
+
+      console.log(
+        `authorizeUrl: ${JSON.stringify(
+          authorizeUrl + "&verifier=" + verifier
+        )}`
+      );
+
+      // const auth = await OAuth2Client.getAuthCodeByIframe({
+      //   clientId: process.env.NEXT_PUBLIC_FORGEROCK_CLIENT_ID!,
+      //   responseType: ResponseType.Code,
+      //   state: state,
+      //   verifier: verifier,
+      //   // scope: "openid profile email",
+      //   // prompt: "none",
+      // });
+
+      // console.log(`authCodeBody: ${JSON.stringify(auth)}`);
+
+      // const authorizationCode =
+      //   new URLSearchParams(new URL(auth).search).get("code") ?? "";
+      // const authorizationState =
+      //   new URLSearchParams(new URL(auth).search).get("state") ?? "";
+      // const authorizationVerifier =
+      //   new URLSearchParams(new URL(auth).search).get("code_challenge") ?? "";
+
+      // console.log(
+      //   `authorizationCode: + ${authorizationCode}, authorizationState: + ${authorizationState}, authorizationVerifier: + ${authorizationVerifier}`
+      // );
+
+      const cookieOptions = {
+        path: "/",
+        httpOnly: false,
+        secure: false,
+        sameSite: "lax" as const,
+      };
+
+      // // setCookie("auth_state", state, cookieOptions);
+      // // setCookie("auth_code", authorizationCode, cookieOptions);
+      setCookie("next-auth.pkce.code_verifier", verifier, cookieOptions);
+      setCookie("oauth_verifier", verifier, cookieOptions);
+
+      // Redirect to ForgeRock login page
+      window.location.href = authorizeUrl; //`${auth}&${verifier}`;
+    })();
+  }, []);
+
+  return <p>Redirecting to ForgeRock login...</p>;
+}
+
+
